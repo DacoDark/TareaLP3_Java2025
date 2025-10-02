@@ -2,6 +2,7 @@ import java.util.Scanner;
 import player.Jugador;
 import player.Oxigeno;
 import entorno.ZonaArrecife;
+import objetos.ItemTipo;
 
 public class Main {
     public static void main(String[] args) {
@@ -13,6 +14,7 @@ public class Main {
 
         // Instanciar zona de prueba
         ZonaArrecife arrecife = new ZonaArrecife();
+        arrecife.entrar(jugador);
 
         System.out.println("=== Exploración Subacuática ===");
         boolean jugando = true;
@@ -21,7 +23,10 @@ public class Main {
             System.out.println("\n--- Menú ---");
             System.out.println("1. Ver estado jugador");
             System.out.println("2. Moverse en profundidad");
-            System.out.println("3. Salir");
+            System.out.println("3. Recolectar recurso");
+            System.out.println("4. Explorar");
+            System.out.println("5. Salir");
+
 
             System.out.print("Opción: ");
             int opcion = sc.nextInt();
@@ -38,6 +43,22 @@ public class Main {
                     break;
 
                 case 3:
+                    System.out.println("Elige recurso: 1=CUARZO, 2=SILICIO, 3=COBRE");
+                    int r = sc.nextInt();
+                    ItemTipo tipo;
+                    switch (r) {
+                        case 1: tipo = ItemTipo.CUARZO; break;
+                        case 2: tipo = ItemTipo.SILICIO; break;
+                        case 3: tipo = ItemTipo.COBRE; break;
+                        default: tipo = ItemTipo.CUARZO;
+                    }
+                    arrecife.recolectarTipoRecurso(jugador, tipo);
+                    break;
+
+                case 4: arrecife.explorarZona(jugador);
+                    break;
+
+                case 5:
                     jugando = false;
                     System.out.println("Saliendo del juego...");
                     break;

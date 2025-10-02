@@ -6,6 +6,7 @@ import entorno.Zona;
 import objetos.AccesoProfundidad;
 import objetos.NaveExploradora;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +28,7 @@ public class Jugador implements AccesoProfundidad {
         this.tienePlanos = false;
         this.mejoraTanque = false;
         this.trajeTermico = false;
+        this.inventario = new ArrayList<>();
     }
 
     /**
@@ -36,7 +38,14 @@ public class Jugador implements AccesoProfundidad {
         System.out.println("Profundidad: " + profundidadActual + " m");
         System.out.println("Zona: " + zonaActual);
         System.out.println("Oxígeno: " + tanqueOxigeno.getOxigenoRestante() + "/" + tanqueOxigeno.getCapacidadMaxima());
-        System.out.println("Inventario: " + inventario);
+        if (inventario.isEmpty()) {
+            System.out.println("Inventario: (vacío)");
+        }else {
+            System.out.println("Inventario:");
+            for (Item it : inventario) {
+                System.out.println(" - " + it);
+            }
+        }
         System.out.println("Mejora tanque: " + mejoraTanque);
         System.out.println("TrajeTermico: " + trajeTermico);
     }
@@ -69,5 +78,19 @@ public class Jugador implements AccesoProfundidad {
 
     public void setMejoraTanque(boolean mejoraTanque) {
         this.mejoraTanque = mejoraTanque;
+    }
+
+    public int getProfundidadActual() {
+        return profundidadActual;
+    }
+
+    public void agregarItem(ItemTipo tipo, int cantidad){
+        for (Item i : inventario) {
+            if (i.getTipo() == tipo){
+                i.setCantidad(i.getCantidad()+cantidad);
+                return;
+            }
+            inventario.add(new Item(tipo,cantidad));
+        }
     }
 }
