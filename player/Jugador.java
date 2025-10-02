@@ -38,6 +38,8 @@ public class Jugador implements AccesoProfundidad {
         System.out.println("Profundidad: " + profundidadActual + " m");
         System.out.println("Zona: " + zonaActual);
         System.out.println("Oxígeno: " + tanqueOxigeno.getOxigenoRestante() + "/" + tanqueOxigeno.getCapacidadMaxima());
+        System.out.println("Mejora tanque: " + mejoraTanque);
+        System.out.println("TrajeTermico: " + trajeTermico);
         if (inventario.isEmpty()) {
             System.out.println("Inventario: (vacío)");
         }else {
@@ -46,8 +48,6 @@ public class Jugador implements AccesoProfundidad {
                 System.out.println(" - " + it);
             }
         }
-        System.out.println("Mejora tanque: " + mejoraTanque);
-        System.out.println("TrajeTermico: " + trajeTermico);
     }
 
 
@@ -91,6 +91,39 @@ public class Jugador implements AccesoProfundidad {
                 return;
             }
             inventario.add(new Item(tipo,cantidad));
+        }
+    }
+
+    public void crearMejoraTanque(){
+        int piezas = contarItem(ItemTipo.PIEZA_TANQUE);
+        if (piezas >= 3 && !mejoraTanque){
+            consumirItem(ItemTipo.PIEZA_TANQUE, 3);
+            this.mejoraTanque = true;
+            getTanqueOxigeno().aumentarOxigeno(tanqueOxigeno.getOxigenoRestante()); //Mejora la capacidad al doble
+            System.out.println("¡Has creado la Mejora tanque! Capacidad de O2 duplicada");
+        } else if (mejoraTanque){
+            System.out.println("Ya tienes la mejora de tanque.");
+        } else {
+            System.out.println("No tienes suficientes PIEZA_TANQUE (necesitas 3)");
+        }
+    }
+
+    private int contarItem(ItemTipo tipo){
+        for (Item i : inventario) {
+            if (i.getTipo() == tipo) return i.getCantidad();
+        }
+        return 0;
+    }
+
+    private void consumirItem(ItemTipo tipo,int cantidad){
+        for (Item i : inventario) {
+            if (i.getTipo() == tipo) {
+                i.setCantidad(i.getCantidad()-cantidad);
+                if (i.getCantidad() <= 0){
+                    inventario.remove(i);
+                }
+                return;
+            }
         }
     }
 }

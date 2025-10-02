@@ -25,7 +25,8 @@ public class Main {
             System.out.println("2. Moverse en profundidad");
             System.out.println("3. Recolectar recurso");
             System.out.println("4. Explorar");
-            System.out.println("5. Salir");
+            System.out.println("5. Crear mejora tanque");
+            System.out.println("6. Salir");
 
 
             System.out.print("Opción: ");
@@ -59,6 +60,10 @@ public class Main {
                     break;
 
                 case 5:
+                    jugador.crearMejoraTanque();
+                    break;
+
+                case 6:
                     jugando = false;
                     System.out.println("Saliendo del juego...");
                     break;
