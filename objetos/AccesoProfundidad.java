@@ -1,5 +1,5 @@
 package objetos;
 
 public interface AccesoProfundidad {
-    boolean puedeAcceder(int profundidad_minima);
+    boolean puedeAcceder(int requerido);
 }

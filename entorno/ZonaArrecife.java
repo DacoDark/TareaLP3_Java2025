@@ -13,12 +13,18 @@ public class ZonaArrecife extends Zona {
     private Random rand = new Random();
 
     public ZonaArrecife() {
+        this.nombre = "Zona Arrecife";
         this.profundidadMin = 0;
         this.profundidadMax = 199;
+        //Falta implementar objeto por zona
     }
     @Override
     public void entrar(Jugador jugador) {
-        System.out.println("Entrando en Zona Arrecife");
+        if (!jugador.puedeAcceder(profundidadMin)){
+            System.out.println("No puedes entrar a la Zona Arrecife");
+            return;
+        }
+        System.out.println("Entrando en Zona Arrecife (0-199m)");
     }
 
     @Override
@@ -54,6 +60,10 @@ public class ZonaArrecife extends Zona {
             jugador.agregarItem(recurso,cantidad);
             System.out.println("Exploraste y obtuviste " + cantidad + " de " + recurso + " (Costo O2: " + costo + ")");
         }
+    }
+
+    public int getProfundidadMin() {
+        return profundidadMin;
     }
 
     /**

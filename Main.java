@@ -60,16 +60,42 @@ public class Main {
                         int subopcion = sc.nextInt();
                         if (subopcion == 1) {
                             enNave = false; // salir al agua
-                            System.out.println("Has salido de la nave.");
+                            jugador.profundidadActualizar(nave.getProfundidadAnclaje(), zonaActual);
+                            System.out.println("Has salido de la nave en profundidad " + nave.getProfundidadAnclaje()+" m.");
                         } else {
                             System.out.println("1. Arrecife, 2. Profunda, 3. Volcánica, 4. Nave Estrellada");
                             int destino = sc.nextInt();
                             switch (destino) {
-                                case 1 -> zonaActual = arrecife;
-                                case 2 -> zonaActual = profunda;
-                                case 3 -> zonaActual = volcanica;
-                                case 4 -> zonaActual = naveEstrellada;
-                                default -> zonaActual = arrecife;
+                                case 1 -> {
+                                    if(nave.puedeAcceder(arrecife.getProfundidadMin()) || jugador.puedeAcceder(arrecife.getProfundidadMin())) {
+                                        zonaActual = arrecife;
+                                    } else {
+                                        System.out.println("No se puede acceder al Arrecife");
+                                    }
+                                }
+                                case 2 -> {
+                                    if(nave.puedeAcceder(profunda.getProfundidadMin()) || jugador.puedeAcceder(profunda.getProfundidadMin())) {
+                                        zonaActual = profunda;
+                                    } else {
+                                        System.out.println("No se puede acceder a la Zona profunda.");
+                                    }
+                                }
+                                case 3 -> {
+                                    if(nave.puedeAcceder(volcanica.getProfundidadMin()) || jugador.puedeAcceder(volcanica.getProfundidadMin())) {
+                                        zonaActual = volcanica;
+                                    } else {
+                                        System.out.println("No se puede acceder a la Zona Volcánica.");
+                                    }
+                                }
+                                case 4 -> {
+                                    //Zona funciona distinto a las demás - bimodal - esto hay que cambiarlo después
+                                    if(nave.puedeAcceder(naveEstrellada.getProfundidadMin()) || jugador.puedeAcceder(naveEstrellada.getProfundidadMin())) {
+                                        zonaActual = naveEstrellada;
+                                    } else {
+                                        System.out.println("No se puede acceder a la Nave Estrellada.");
+                                    }
+                                }
+                                default -> System.out.println("Opción inválida.");
                             }
                             System.out.println("Has viajado a: " + zonaActual.getClass().getSimpleName());
                         }
@@ -88,7 +114,7 @@ public class Main {
                 System.out.println("3. Recolectar recurso");
                 System.out.println("4. Explorar");
                 System.out.println("5. Volver a la nave");
-                
+
                 System.out.print("Opción: ");
                 int opcion = sc.nextInt();
 

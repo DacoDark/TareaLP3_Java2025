@@ -65,7 +65,16 @@ public class Jugador implements AccesoProfundidad {
 
     @Override
     public boolean puedeAcceder(int profundidad_minima) {
-        return this.profundidadActual >= profundidad_minima;
+        if(profundidad_minima >= 1000){
+            // Volcánica o más abajo
+            return this.mejoraTanque && this.trajeTermico;
+        } else if (profundidad_minima >= 500) {
+            // Zona Profunda
+            return this.mejoraTanque;
+        } else {
+            //Arrecife
+            return true;
+        }
     }
 
     public Oxigeno getTanqueOxigeno() {
