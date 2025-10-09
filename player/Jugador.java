@@ -21,6 +21,7 @@ public class Jugador implements AccesoProfundidad {
     private NaveExploradora nave;
     private boolean trajeTermico;
     private boolean mejoraTanque;
+    private boolean juegoCompletado = false;
 
     public Jugador(Oxigeno oxigeno){
         this.tanqueOxigeno = oxigeno;
@@ -84,13 +85,25 @@ public class Jugador implements AccesoProfundidad {
     public boolean isMejoraTanque() {
         return mejoraTanque;
     }
-
     public void setMejoraTanque(boolean mejoraTanque) {
         this.mejoraTanque = mejoraTanque;
     }
 
+    public void setTienePlanos(){
+        this.tienePlanos = true;
+    }
+    public boolean isTienePlanos() {
+        return tienePlanos;
+    }
+
     public int getProfundidadActual() {
         return profundidadActual;
+    }
+    public void setTrajeTermico (){
+        this.trajeTermico = true;
+    }
+    public boolean isTrajeTermico() {
+        return trajeTermico;
     }
 
     public void agregarItem(ItemTipo tipo, int cantidad){
@@ -117,11 +130,14 @@ public class Jugador implements AccesoProfundidad {
         }
     }
 
-    private int contarItem(ItemTipo tipo){
-        for (Item i : inventario) {
-            if (i.getTipo() == tipo) return i.getCantidad();
+    public int contarItem(ItemTipo tipo) {
+        int total = 0;
+        for (Item item : inventario) {
+            if (item.getTipo() == tipo) {
+                total += item.getCantidad();
+            }
         }
-        return 0;
+        return total;
     }
 
     private void consumirItem(ItemTipo tipo,int cantidad){
@@ -134,5 +150,12 @@ public class Jugador implements AccesoProfundidad {
                 return;
             }
         }
+    }
+
+    public boolean isJuegoCompletado() {
+        return juegoCompletado;
+    }
+    public void setJuegoCompletado(boolean juegoCompletado) {
+        this.juegoCompletado = juegoCompletado;
     }
 }
