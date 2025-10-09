@@ -19,6 +19,7 @@ public class ZonaVolcanica extends Zona {
 
     @Override
     public void entrar(Jugador jugador) {
+        //Validación global
         if (!jugador.puedeAcceder(profundidadMin)){
             System.out.println("No es seguro, faltan requisitos para entrar a la Zona Volcánica, por tu seguridad mejor vuelve.");
             return;

@@ -28,4 +28,12 @@ public abstract class Zona {
     public double normalizarProfundidad(double profundidad) {
         return (profundidad-profundidadMin) / Math.max(1,(profundidadMax-profundidadMin));
     }
+
+    public int getProfundidadMin(){
+        return profundidadMin;
+    }
+
+    public int getProfundidadMax(){
+        return profundidadMax;
+    }
 }
