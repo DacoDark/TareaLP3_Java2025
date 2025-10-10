@@ -1,22 +1,34 @@
 package objetos;
 
+import player.Jugador;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.List;
+
 /**
  * Nave principal del Jugador
+ * Principal transporte del jugador entre zonas y poder guardar sus objetos
+ * Aquí se pueden construir cosas.
  */
 public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
-    private int profundidadSoportada;
+    private final int profundidadSoportada;
     private int profundidadAnclaje;
-    private ModuloProfundidad modulo; //Proveniente de la clase anidada
+    private final ModuloProfundidad modulo; //Proveniente de la clase anidada
 
     public NaveExploradora() {
         this.profundidadSoportada  = 500;       // límite base
         this.profundidadAnclaje = 0;            // Superficie por defecto
         this.modulo = new ModuloProfundidad();
+        this.bodega = new ArrayList<>();
     }
 
+    //*******************
+    //*     Anclaje     *
+    //*******************
     /**
      * Anclar la nave en una determinada profundidad por el jugador
-     * @param profundidad_nueva int
+     * @param profundidad_nueva tipo: int; descripción: profundidad a la que se va a anclar.
      */
     public void anclarNaveExploradora(int profundidad_nueva){
         if (profundidad_nueva <= getProfundidadMaximaPermitida()){
@@ -40,15 +52,184 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         return modulo.isActivo() ? (profundidadSoportada + modulo.getProfundidadExtra()) : profundidadSoportada;
     }
 
+    //*******************
+    //*     Bodega      *
+    //*******************
+
     @Override
-    public void transferirObjetos(){
-        System.out.println("Transferencia de objetos aún no implementada");
+    public void transferirObjetos(Jugador jugador, ItemTipo tipo, int cantidad){
+        if (jugador.contarItem(tipo) < cantidad){
+            System.out.println("No tienes esa cantidad en el inventario.");
+        }
+        jugador.consumirItem(tipo,cantidad);
+        agregarABodega(tipo,cantidad);
+        System.out.println("Guardaste " + cantidad + " de " + tipo + " en la bodega.");
+    }
+    @Override
+    public void agregarABodega(ItemTipo tipo, int cantidad) {
+        for(Item i : bodega){
+            if(i.getTipo() == tipo){
+                i.setCantidad(i.getCantidad()+cantidad);
+            }
+        }
+        bodega.add(new Item(tipo,cantidad));
+    }
+
+    @Override
+    public void retirarDeBodega(Jugador jugador, ItemTipo tipo, int cantidad) {
+        for (Item i : bodega){
+            if(i.getTipo() == tipo){
+                if (i.getCantidad() >= cantidad){
+                    i.setCantidad(i.getCantidad() - cantidad);
+                    jugador.agregarItem(tipo,cantidad);
+                    if (i.getCantidad() == 0) bodega.remove(i);
+                    System.out.println("Retiraste " + cantidad + " de " + tipo + " de la bodega.");
+                } else {
+                    System.out.println("No tienes esa cantidad en la bodega.");
+                }
+            } else {
+                System.out.println("No tienes de este recurso en la bodega.");
+            }
+        }
+    }
+
+    @Override
+    public void verBodega() {
+        System.out.println("\n=== Bodega de la NaveExploradora ===");
+        if (bodega.isEmpty()){
+            System.out.println("Vacía. Puedes guardar tus recursos aquí");
+        }
+        for (Item i : bodega){
+            System.out.printf("- %s: %d%n", i.getTipo(), i.getCantidad());
+        }
+    }
+
+    public List<Item> getBodega() {
+        return bodega;
+    }
+
+    //*******************
+    //*     Crafteo     *
+    //*******************
+    public void menuCrafteo(Jugador jugador){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("\n=== Menu Crafteo ===");
+        System.out.println("Usa los materiales almacenados en la bodega.");
+        verBodega();
+        System.out.println("\n1. Fabricar traje térmico");
+        System.out.println("2. Mejorar tanque de oxígeno");
+        System.out.println("3. Mejorar Capacidad de oxígeno");
+        System.out.println("4. Instalar módulo de profundidad");
+        System.out.println("5. Ensamblar robot excavador");
+        System.out.println("6. Salir");
+        System.out.println("\nSeleciona una opción: ");
+        int opcion = sc.nextInt();
+        switch (opcion){
+            case 1 -> fabricarTrajeTermico(jugador);
+            case 2 -> mejorarTanque(jugador);
+            case 3 -> mejorarTanqueOxigeno(jugador);
+            case 4 -> instalarModuloProfundidad(jugador);
+            case 5 -> ensamblarRobotExcavador(jugador);
+            case 6 -> System.out.println("Saliendo del menú de crafteo...");
+            default -> System.out.println("Opción no válida");
+        }
+    }
+
+    private void fabricarTrajeTermico(Jugador jugador){
+        if (jugador.isTrajeTermico()){
+            System.out.println("Ya tienes un traje térmico");
+        }
+        if (tieneMateriales(ItemTipo.SILICIO, 10, ItemTipo.ORO,3, ItemTipo.CUARZO,5)){
+            consumirDeBodega(ItemTipo.SILICIO, 10);
+            consumirDeBodega(ItemTipo.ORO, 3);
+            consumirDeBodega(ItemTipo.CUARZO,5);
+            jugador.setTrajeTermico();
+            System.out.println("Traje termico fabricado con éxito");
+        } else {
+            System.out.println("Materiales insuficientes (10 Silicio, 3 Oro, 5 Cuarzo)");
+        }
+    }
+
+    private void mejorarTanque(Jugador jugador){
+        if (jugador.isMejoraTanque()){
+            System.out.println("Ya tienes un mejora tanque");
+        }
+        if (tieneMateriales(ItemTipo.PIEZA_TANQUE,3)){
+            consumirDeBodega(ItemTipo.PIEZA_TANQUE,3);
+            jugador.setMejoraTanque(true);
+            jugador.getTanqueOxigeno().aumentarOxigeno(60); //Base(60) mejora del 100% otros 60.
+            System.out.println("Tanque de oxígeno mejorado, Ahora no sufrirás los efectos de la presión, Capacidad aumentada en un 100%.");
+        } else {
+            System.out.println("Materiales insuficientes (3 Pieza_Tanque)");
+        }
+    }
+
+    private void mejorarTanqueOxigeno(Jugador jugador){
+        if (jugador.isMejoraTanque()){
+            System.out.println("Necesitas mejorar el tanque primero");
+        }
+        if (tieneMateriales(ItemTipo.PLATA,10,ItemTipo.CUARZO,15)){
+            consumirDeBodega(ItemTipo.PLATA,10);
+            consumirDeBodega(ItemTipo.CUARZO,15);
+            jugador.getTanqueOxigeno().aumentarOxigeno(30);
+            System.out.println("Tanque de oxígeno mejorado, Ahora no sufrirás los efectos de la presión, Capacidad aumentada en un 100%.");
+        } else {
+            System.out.println("Materiales insuficientes (10 Plata,15 Cuarzo)");
+        }
+    }
+
+    private void instalarModuloProfundidad(Jugador jugador){
+        if (jugador.tieneModuloProfundidad()){
+            System.out.println("Ya tienes el modulo de profundidad instalado");
+        }
+        if (tieneMateriales(ItemTipo.MODULO_PROFUNDIDAD,1)){
+            consumirDeBodega(ItemTipo.MODULO_PROFUNDIDAD, 1);
+            modulo.aumentarProfundidad(1000); //500 m permitidos, se le agrega 1000 para alcanzar los 1500 m.
+        } else {
+            System.out.println("Aún no has encontrado el módulo para instalarlo");
+        }
+    }
+
+    private void ensamblarRobotExcavador(Jugador jugador){
+        //Implementar aquí las funciones del Robot.
+    }
+
+    //*******************************
+    //*     Auxiliares de Bodega    *
+    //*******************************
+
+    private boolean tieneMateriales(Object... args){
+        for (int i = 0; i < args.length; i += 2){
+            ItemTipo tipo = (ItemTipo) args[i];
+            int cantidad = (int)args[i+1];
+            if (contarEnBodega(tipo) < cantidad){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void consumirDeBodega(ItemTipo tipo, int cantidad){
+        for (Item i : bodega){
+            if (i.getTipo() == tipo){
+                i.setCantidad(i.getCantidad() - cantidad);
+                if (i.getCantidad() <= 0) bodega.remove(i);
+            }
+        }
+    }
+
+    private int contarEnBodega(ItemTipo tipo){
+        for (Item i : bodega){
+            if (i.getTipo() == tipo)
+                return i.getCantidad();
+        }
+        return 0;
     }
 
     /**
      * Clase anidada para el Módulo de profundidad
      */
-    public class ModuloProfundidad{
+    public static class ModuloProfundidad{
         private boolean activo;
         private int profundidad_extra;
 

@@ -21,8 +21,14 @@ public class RobotExcavador extends Vehiculo{
     }
 
     @Override
-    public void transferirObjetos(){}
+    public void transferirObjetos(Jugador jugador, ItemTipo tipo, int cantidad) {}
 
+    @Override
+    public void agregarABodega(ItemTipo tipo, int cantidad) {}
 
+    @Override
+    public void verBodega() {}
 
+    @Override
+    public void retirarDeBodega(Jugador jugador, ItemTipo tipo, int cantidad) {}
 }

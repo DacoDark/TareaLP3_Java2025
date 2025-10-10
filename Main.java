@@ -1,15 +1,19 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.List;
 
 import entorno.NaveEstrellada;
 import player.Jugador;
 import player.Oxigeno;
+import objetos.Item;
 import objetos.NaveExploradora;
 import objetos.ItemTipo;
 import entorno.Zona;
 import entorno.Zonas;
 
 public class Main {
+    private static final Scanner scan = new Scanner(System.in);
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -43,9 +47,12 @@ public class Main {
                     System.out.println("1. Ver estado jugador");
                     System.out.println("2. Anclar nave (fijar profundidad)");
                     System.out.println("3. Ver inventario");
-                    System.out.println("4. Mejorar equipamiento");
-                    System.out.println("5. Viajar / salir al agua");
-                    System.out.println("6. Salir del juego");
+                    System.out.println("4. Ver inventario Bodega");
+                    System.out.println("5. Guardar objetos en bodega");
+                    System.out.println("6. Retirar objetos en bodega");
+                    System.out.println("7. Abrir el menú de crafteo");
+                    System.out.println("8. Viajar / salir al agua");
+                    System.out.println("9. Salir del juego");
                     System.out.print("Opción: ");
                     int opcion = sc.nextInt();
 
@@ -56,47 +63,33 @@ public class Main {
                             int profundidad = sc.nextInt();
                             nave.anclarNaveExploradora(profundidad);
                         }
-                        case 3 -> System.out.println("(gestión de inventario aún no implementada)");
-                        case 4 -> { //Implementar las funciones con los items que piden
-                            System.out.println("\nOperaciones rápidas:");
-                            System.out.println("1. Crear mejora tanque (3 PIEZA_TANQUE)");
-                            System.out.println("2. Instalar MÓDULO_PROFUNDIDAD (si lo posees)");
-                            System.out.println("3. Crear Traje Termico");
-                            System.out.println("4. Mejorar Robot Excavador");
-                            System.out.println("5. Reparar nave");
-                            System.out.print("Elige: ");
-                            int opt = sc.nextInt();
-
-                            switch (opt) {
-                                case 1 -> jugador.crearMejoraTanque();
-                                case 2 -> {
-                                    if (jugador.contarItem(ItemTipo.MODULO_PROFUNDIDAD) > 0) {
-                                        nave.getModuloProfundidad().aumentarProfundidad(1000);
-                                        System.out.println("✅ Módulo de profundidad instalado (profundidad máxima +1000 m)");
-                                    } else {
-                                        System.out.println("❌ No tienes MÓDULO_PROFUNDIDAD.");
-                                    }
-                                }
-                                case 3 -> {
-                                    //Implementar la creación del Traje termico aquí
-                                }
-                                case 4 -> {
-                                    //Implementar la creación del Robot aquí
-                                }
-                                case 5 -> {
-                                    //Implementar la creación del plano aquí
-                                    jugador.setJuegoCompletado(true);
-                                }
-                                default -> System.out.println("Opción inválida.");
+                        case 3 -> jugador.verInventario();
+                        case 4 -> nave.verBodega();
+                        case 5 -> {
+                            System.out.println("¿Qué deseas guardar?");
+                            ItemTipo tipo = seleccionarItemTipo(jugador,nave,false);
+                            if (tipo != null) {
+                                System.out.println("Cantidad a guardad: ");
+                                int cantidad = sc.nextInt();
+                                nave.transferirObjetos(jugador,tipo,cantidad);
                             }
                         }
-
-                        case 5 -> {
+                        case 6 -> {
+                            System.out.println("¿Qué deseas retirar?");
+                            ItemTipo tipo = seleccionarItemTipo(jugador, nave, true);
+                            if (tipo != null) {
+                                System.out.println("Cantidad a retirada: ");
+                                int cantidad = sc.nextInt();
+                                nave.transferirObjetos(jugador,tipo,cantidad);
+                            }
+                        }
+                        case 7 -> nave.menuCrafteo(jugador); //Se implementa el crafteo desde la nave
+                        case 8 -> {
                             System.out.println("1. Salir al agua en la zona actual");
                             System.out.println("2. Viajar a otra zona");
-                            int subop = sc.nextInt();
+                            int subopcion = sc.nextInt();
 
-                            if (subop == 1) {
+                            if (subopcion == 1) {
                                 int profSalida = nave.getProfundidadAnclaje();
                                 jugador.profundidadActualizar(profSalida, zonaActual);
                                 enNave = false;
@@ -133,7 +126,7 @@ public class Main {
                                 }
                             }
                         }
-                        case 6 -> {
+                        case 9 -> {
                             jugando = false;
                             System.out.println("Saliendo del juego...");
                         }
@@ -252,5 +245,43 @@ public class Main {
             };
             default -> null;
         };
+    }
+
+    public static ItemTipo seleccionarItemTipo(Jugador jugador, NaveExploradora nave, boolean desdeBodega) {
+        System.out.println("\n=== Selección de Ítem ===");
+        List<Item> fuente = desdeBodega ? nave.getBodega() : jugador.getInventario();
+
+        if (fuente.isEmpty()) {
+            System.out.println("No hay ítems disponibles en " + (desdeBodega ? "la bodega." : "tu inventario."));
+            return null;
+        }
+
+        int index = 1;
+        for (Item it : fuente) {
+            if (it.getCantidad() > 0) {
+                System.out.printf("%2d. %-20s [x%d]%n", index++, it.getTipo(), it.getCantidad());
+            }
+        }
+
+        System.out.println("0. Cancelar");
+        System.out.print("Selecciona el número del ítem: ");
+
+        int opcion;
+        try {
+            opcion = Integer.parseInt(scan.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Entrada inválida. Se cancela la selección.");
+            return null;
+        }
+
+        if (opcion == 0) return null;
+        if (opcion < 1 || opcion >= index) {
+            System.out.println("Opción fuera de rango.");
+            return null;
+        }
+
+        ItemTipo elegido = fuente.get(opcion - 1).getTipo();
+        System.out.println("Seleccionado: " + elegido);
+        return elegido;
     }
 }
