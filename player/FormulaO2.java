@@ -29,7 +29,7 @@ public class FormulaO2 {
      * Costo de Mover
      * @param d double
      * @param delta_profundidad int
-     * @return
+     * @return int
      */
     public static int cMover(double d, int delta_profundidad) {
         return (int) Math.ceil((3 + (3*d)) * (delta_profundidad/ 50.0));
@@ -45,8 +45,8 @@ public class FormulaO2 {
     public static double presion(String zona, double d, boolean mejoraTanque){
         if (mejoraTanque) return 0;
         return switch (zona) {
-            case "Zona Profunda" -> 10 + 6 * d;
-            case "Zona Volcanica" -> Double.POSITIVE_INFINITY;
+            case "ZonaProfunda" -> 10 + 6 * d;
+            case "ZonaVolcanica" -> Double.POSITIVE_INFINITY;
             default -> 0;
         };
     }

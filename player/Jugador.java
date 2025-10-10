@@ -105,6 +105,9 @@ public class Jugador implements AccesoProfundidad {
     public boolean isTrajeTermico() {
         return trajeTermico;
     }
+    public boolean tieneModuloProfundidad(){
+        return nave.getModuloProfundidad().isActivo();
+    }
 
     public void agregarItem(ItemTipo tipo, int cantidad){
         for (Item i : inventario) {

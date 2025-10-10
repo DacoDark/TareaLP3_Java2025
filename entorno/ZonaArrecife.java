@@ -6,18 +6,27 @@ import objetos.ItemTipo;
 import java.util.Random;
 
 /**
- * Zona del Arrecife
+ * Zona del Arrecife (0-199 m)
+ * Recursos: Cuarzo, Silicio, Cobre
  */
 public class ZonaArrecife extends Zona {
     private int piezasTanque = 3;
-    private Random rand = new Random();
+    private final Random rand;
 
+    /**
+     * Constructor de la clase
+     */
     public ZonaArrecife() {
         this.nombre = "Zona Arrecife";
         this.profundidadMin = 0;
         this.profundidadMax = 199;
-        //Falta implementar objeto por zona
+        rand = new Random();
     }
+
+    /**
+     * Función que verifica si el jugador puede entrar a la zona.
+     * @param jugador tipo: Jugador; Descripción: Personaje que juega el juego.
+     */
     @Override
     public void entrar(Jugador jugador) {
         if (!jugador.puedeAcceder(profundidadMin)){
@@ -27,6 +36,11 @@ public class ZonaArrecife extends Zona {
         System.out.println("Entrando en Zona Arrecife (0-199m)");
     }
 
+    /**
+     * Función que recolecta objetos dado un tipo específico que se busca
+     * @param jugador tipo: Jugador; Descripción: Personaje que juega el juego
+     * @param tipo tipo: ItemTipo; Descripción: Tipo del item que quiere encontrar.
+     */
     @Override
     public void recolectarTipoRecurso(Jugador jugador, ItemTipo tipo) {
         double d = normalizarProfundidad(jugador.getProfundidadActual());
@@ -35,18 +49,22 @@ public class ZonaArrecife extends Zona {
 
         jugador.getTanqueOxigeno().consumirO2(costo);
 
-        //Cambia con la zona
-        int cantidad = cantidadLoot(d,1,3);
+        //Cambia la cantidad de loot con la zona (min:2; max:6)
+        int cantidad = cantidadLootRecolectar(d);
         jugador.agregarItem(tipo,cantidad);
 
         System.out.println("Recolectaste " + cantidad +" de " + tipo + " (costo O2: " + costo + ")");
     }
 
+    /**
+     * Función que explora la zona por objetos únicos y en caso de no encontrar adquiere objetos aleatorios de la zona
+     * @param jugador tipo: Jugador; Descripción: Personaje que juega el juego
+     */
     @Override
     public void explorarZona(Jugador jugador) {
         double d = normalizarProfundidad(jugador.getProfundidadActual());
-        double press = FormulaO2.presion("ZonaArrecife",d,jugador.isMejoraTanque());
-        int costo = FormulaO2.cExplorar(d, press);
+        double presion = FormulaO2.presion("ZonaArrecife",d,jugador.isMejoraTanque());
+        int costo = FormulaO2.cExplorar(d, presion);
 
         jugador.getTanqueOxigeno().consumirO2(costo);
         if (piezasTanque>0 && rand.nextDouble() < 0.3) {
@@ -56,25 +74,45 @@ public class ZonaArrecife extends Zona {
         } else {
             ItemTipo[] recursos = {ItemTipo.CUARZO,ItemTipo.SILICIO,ItemTipo.COBRE};
             ItemTipo recurso = recursos[rand.nextInt(recursos.length)];
-            int cantidad = cantidadLoot(d,1,3);
+            int cantidad = cantidadLootExploracion(d);
             jugador.agregarItem(recurso,cantidad);
             System.out.println("Exploraste y obtuviste " + cantidad + " de " + recurso + " (Costo O2: " + costo + ")");
         }
     }
 
+    // ****************************************
+    // *    Getters y Setters de la Clase     *
+    // ****************************************
+    /**
+     * Getter del parámetro profundidad de la zona.
+     * @return tipo:int; descripción: Valor de la profundidad mínima de la zona
+     */
     public int getProfundidadMin() {
         return profundidadMin;
     }
 
+    // ******************************
+    // *    Métodos de la Clase     *
+    // ******************************
+
     /**
      * La cantidad de loot por acción de recolectar aumenta con la profundidad y sigue la siguiente formula:
      * n(d) = max(1, floor(numero_min + (numero_max - numero_min)*d))
+     *
      * @param d tipo: double; descripción: profundidad
-     * @param numero_min tipo: int; descripción: cantidad minima que puede encontrar
-     * @param numero_max tipo: int; descripción: cantidad máxima que puede encontrar
      * @return Tipo:int; descripción: Cantidad encontrada.
      */
-    private int cantidadLoot(double d, int numero_min,int numero_max) {
-        return Math.max(1,(int)Math.floor(numero_min + (numero_max-numero_min) * d));
+    private int cantidadLootRecolectar(double d) {
+        return Math.max(1,(int)Math.floor(1 + (3 - 1) * d));
+    }
+
+    /**
+     * La cantidad de loot por acción de explorar y no encontrar el objeto único, aumenta con la profundidad y sigue la siguiente fórmula:
+     * n(d) = max(1, floor(numero_min*d))
+     * @param d tipo: double; descripción: profundidad
+     * @return Tipo:int; descripción: Cantidad encontrada.
+     */
+    private int cantidadLootExploracion(double d) {
+        return Math.max(1,(int)Math.floor(1*d));
     }
 }

@@ -103,8 +103,8 @@ public class Main {
                                 System.out.println("Has salido al agua en " + profSalida + " m.");
                             } else {
                                 System.out.println("Elige destino:");
-                                System.out.println("1. Arrecife (0–500)");
-                                System.out.println("2. Profunda (500–1000)");
+                                System.out.println("1. Arrecife (0–199)");
+                                System.out.println("2. Profunda (200–999)");
                                 System.out.println("3. Volcánica (1000–1500)");
                                 System.out.println("4. Nave Estrellada (0 m)");
                                 int destino = sc.nextInt();
@@ -163,7 +163,7 @@ public class Main {
                             break;
 
                         case 3:
-                            mostrarOpcionesRecolecta(zonaActual);
+                            mostrarOpcionesRecolectar(zonaActual);
                             System.out.print("Elige recurso: ");
                             int r = sc.nextInt();
                             ItemTipo tipo = mapearOpcionARecurso(zonaActual, r);
@@ -211,7 +211,7 @@ public class Main {
      * Métodos auxiliares para recursos según zonas
      */
 
-    private static void mostrarOpcionesRecolecta(Zona zona){
+    private static void mostrarOpcionesRecolectar(Zona zona){
         String cls = zona.getClass().getSimpleName();
         System.out.println("Recursos disponibles: ");
         switch (cls) {
