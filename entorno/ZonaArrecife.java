@@ -3,6 +3,9 @@ package entorno;
 import player.Jugador;
 import player.FormulaO2;
 import objetos.ItemTipo;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Random;
 
 /**
@@ -21,6 +24,11 @@ public class ZonaArrecife extends Zona {
         this.profundidadMin = 0;
         this.profundidadMax = 199;
         rand = new Random();
+        this.recursos = EnumSet.of(
+                ItemTipo.CUARZO,
+                ItemTipo.SILICIO,
+                ItemTipo.COBRE
+        );
     }
 
     /**
@@ -67,16 +75,17 @@ public class ZonaArrecife extends Zona {
         int costo = FormulaO2.cExplorar(d, presion);
 
         jugador.getTanqueOxigeno().consumirO2(costo);
+        System.out.println("Exploras el colorido arrecife, lleno de vida marina");
         if (piezasTanque>0 && rand.nextDouble() < 0.3) {
             jugador.agregarItem(ItemTipo.PIEZA_TANQUE,1);
             piezasTanque--;
             System.out.println("¡Encontraste una PIEZA_TANQUE! (Costo O2: " + costo + ")");
         } else {
-            ItemTipo[] recursos = {ItemTipo.CUARZO,ItemTipo.SILICIO,ItemTipo.COBRE};
-            ItemTipo recurso = recursos[rand.nextInt(recursos.length)];
+            var listaRecursos = new ArrayList<>(recursos);
+            ItemTipo encontrado = listaRecursos.get(rand.nextInt(listaRecursos.size()));
             int cantidad = cantidadLootExploracion(d);
-            jugador.agregarItem(recurso,cantidad);
-            System.out.println("Exploraste y obtuviste " + cantidad + " de " + recurso + " (Costo O2: " + costo + ")");
+            jugador.agregarItem(encontrado,cantidad);
+            System.out.println("Exploraste y obtuviste " + cantidad + " de " + encontrado + " (Costo O2: " + costo + ")");
         }
     }
 

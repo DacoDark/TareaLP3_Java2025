@@ -3,6 +3,9 @@ package entorno;
 import player.Jugador;
 import player.FormulaO2;
 import objetos.ItemTipo;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Random;
 
 /**
@@ -22,6 +25,11 @@ public class ZonaVolcanica extends Zona {
         this.profundidadMin = 1000;
         this.profundidadMax = 1500;
         rand = new Random();
+        this.recursos = EnumSet.of(
+                ItemTipo.TITANIO,
+                ItemTipo.SULFURO,
+                ItemTipo.URANIO
+        );
     }
     /**
      * Función que verifica si el jugador puede entrar a la zona.
@@ -68,16 +76,17 @@ public class ZonaVolcanica extends Zona {
         int costo = FormulaO2.cExplorar(d, presion);
 
         jugador.getTanqueOxigeno().consumirO2(costo);
+        System.out.println("Te acercas a un pequeño crater humeante, el calor es abrasador...");
         if (!planoEncontrado && rand.nextDouble() < 0.15) {
             setPlanoEncontrado();
             jugador.agregarItem(ItemTipo.PLANO_NAVE,1);
             System.out.println("¡Encontraste El Plano de las Nave! Ahora podrás repararla (Costo O2: " + costo + ")");
         } else {
-            ItemTipo[] recursos = {ItemTipo.TITANIO,ItemTipo.SULFURO,ItemTipo.URANIO};
-            ItemTipo recurso = recursos[rand.nextInt(recursos.length)];
+            var lista_Recursos = new ArrayList<>(recursos);
+            ItemTipo encontrado = lista_Recursos.get(rand.nextInt(lista_Recursos.size()));
             int cantidad = cantidadLootExploracion(d);
-            jugador.agregarItem(recurso,cantidad);
-            System.out.println("Exploraste y obtuviste " + cantidad + " de " + recurso + " (Costo O2: " + costo + ")");
+            jugador.agregarItem(encontrado,cantidad);
+            System.out.println("Entre las rocas fundidas, hallas rastro de " + encontrado + "con una cantidad "+cantidad+ " (Costo O2: " + costo + ")");
 
         }
     }

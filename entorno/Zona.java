@@ -36,4 +36,12 @@ public abstract class Zona {
     public int getProfundidadMax(){
         return profundidadMax;
     }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public EnumSet<ItemTipo> getRecursos(){
+        return recursos;
+    }
 }

@@ -3,6 +3,9 @@ package entorno;
 import player.Jugador;
 import player.FormulaO2;
 import objetos.ItemTipo;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Random;
 
 /**
@@ -13,7 +16,7 @@ import java.util.Random;
  * -Sin la mejora de tanque la presión hace efecto, una vez mejorado la presión suma 0 a la fórmula de oxígeno.
  */
 public class ZonaProfunda extends Zona {
-    private int presion;
+    private final int presion;
     private final Random rand;
 
     /**
@@ -25,6 +28,13 @@ public class ZonaProfunda extends Zona {
         this.profundidadMax = 999;
         this.presion = 10;
         rand = new Random();
+        this.recursos = EnumSet.of(
+                ItemTipo.PLATA,
+                ItemTipo.ORO,
+                ItemTipo.ACERO,
+                ItemTipo.DIAMANTE,
+                ItemTipo.MAGNETITA
+        );
     }
     /**
      * Función que verifica si el jugador puede entrar a la zona.
@@ -76,12 +86,12 @@ public class ZonaProfunda extends Zona {
         int costo = FormulaO2.cRecolectar(d,presion);
         jugador.getTanqueOxigeno().consumirO2(costo);
 
-        ItemTipo[] posibles = {ItemTipo.PLATA,ItemTipo.ORO,ItemTipo.ACERO,ItemTipo.DIAMANTE,ItemTipo.MAGNETITA};
-        ItemTipo hallazgo = posibles[rand.nextInt(posibles.length)];
+        var listaRecursos = new ArrayList<>(recursos);
+        ItemTipo encontrado = listaRecursos.get(rand.nextInt(listaRecursos.size()));
         int cantidad = cantidadLootExploracion(d);
 
-        jugador.agregarItem(hallazgo, cantidad);
-        System.out.println("Exploraste grietas abisales y hallaste " + cantidad + " de " + hallazgo + " (O₂ -" + costo + ")");
+        jugador.agregarItem(encontrado, cantidad);
+        System.out.println("Exploraste grietas abisales y hallaste " + cantidad + " de " + encontrado + " (O₂ -" + costo + ")");
     }
 
     // ****************************************
