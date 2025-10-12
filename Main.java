@@ -52,7 +52,8 @@ public class Main {
                     System.out.println("6. Retirar objetos en bodega");
                     System.out.println("7. Abrir el menú de crafteo");
                     System.out.println("8. Viajar / salir al agua");
-                    System.out.println("9. Salir del juego");
+                    System.out.println("9. Gestionar robot excavador");
+                    System.out.println("10. Salir del juego");
                     System.out.print("Opción: ");
                     int opcion = sc.nextInt();
 
@@ -127,6 +128,20 @@ public class Main {
                             }
                         }
                         case 9 -> {
+                            System.out.println("1. Excavar recursos automáticamente");
+                            System.out.println("2. Descargar recursos en nave");
+                            System.out.println("3. Reparar robot");
+                            System.out.println("4. Mejorar robot");
+                            int opRobot = sc.nextInt();
+
+                            switch (opRobot) {
+                                case 1 -> jugador.getRobot().excavarRecursos(jugador);
+                                case 2 -> jugador.getRobot().descargarEnNave(nave);
+                                case 3 -> jugador.getRobot().reparar();
+                                case 4 -> jugador.getRobot().mejorar();
+                            }
+                        }
+                        case 10 -> {
                             jugando = false;
                             System.out.println("Saliendo del juego...");
                         }

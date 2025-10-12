@@ -61,8 +61,8 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         if (jugador.contarItem(tipo) < cantidad){
             System.out.println("No tienes esa cantidad en el inventario.");
         }
-        jugador.consumirItem(tipo,cantidad);
         agregarABodega(tipo,cantidad);
+        jugador.consumirItem(tipo,cantidad);
         System.out.println("Guardaste " + cantidad + " de " + tipo + " en la bodega.");
     }
     @Override
