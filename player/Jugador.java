@@ -1,10 +1,8 @@
 package player;
 
-import objetos.Item;
-import objetos.ItemTipo;
+import entorno.Zonas;
+import objetos.*;
 import entorno.Zona;
-import objetos.AccesoProfundidad;
-import objetos.NaveExploradora;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +17,7 @@ public class Jugador implements AccesoProfundidad {
     private int profundidadActual;
     private boolean tienePlanos;
     private NaveExploradora nave;
+    private RobotExcavador robot;
     private boolean trajeTermico;
     private boolean mejoraTanque;
     private boolean moduloInstalado;
@@ -36,6 +35,7 @@ public class Jugador implements AccesoProfundidad {
         this.trajeTermico = false;
         this.moduloInstalado = false;
         this.inventario = new ArrayList<>();
+        this.zonaActual = Zonas.naveEstrellada;
     }
 
     //*******************************************
@@ -53,8 +53,19 @@ public class Jugador implements AccesoProfundidad {
         System.out.println("Traje Térmico: " + (trajeTermico ? "Sí" : "No"));
         System.out.println("Modulo Instalado: " + (moduloInstalado ? "Sí" : "No"));
         System.out.println("Planos: " + (tienePlanos ? "Sí" : "No"));
-        System.out.println("Zona: " + zonaActual);
+        System.out.println("Zona: " + zonaActual.getNombre());
         verInventario();
+
+        if (robot != null){
+            System.out.println("\n=== Estado del Robot Excavador ===");
+            System.out.printf("Nivel: %d%n", robot.getNivel());
+            System.out.printf("Energía: %d / %d%n", robot.getEnergia(), robot.getEnergiaMax());
+            System.out.printf("Durabilidad: %d / %d%n", robot.getDurabilidad(), robot.getDurabilidadMax());
+            System.out.printf("Carga: %d / %d%n", robot.getCargaActual(), robot.getCapacidad_carga());
+            System.out.println("Estado: " + (robot.isAveriado() ? "Dañado" : "Operativo"));
+        } else {
+            System.out.println("\n🤖 No tienes un robot excavador asignado.");
+        }
     }
 
     @Override
@@ -71,19 +82,6 @@ public class Jugador implements AccesoProfundidad {
         }
     }
 
-    public void crearMejoraTanque(){
-        int piezas = contarItem(ItemTipo.PIEZA_TANQUE);
-        if (piezas >= 3 && !mejoraTanque){
-            consumirItem(ItemTipo.PIEZA_TANQUE, 3);
-            this.mejoraTanque = true;
-            getTanqueOxigeno().aumentarOxigeno(tanqueOxigeno.getOxigenoRestante()); //Mejora la capacidad al doble
-            System.out.println("¡Has creado la Mejora tanque! Capacidad de O2 duplicada");
-        } else if (mejoraTanque){
-            System.out.println("Ya tienes la mejora de tanque.");
-        } else {
-            System.out.println("No tienes suficientes PIEZA_TANQUE (necesitas 3)");
-        }
-    }
 
     //***********************
     //*     Inventario      *
@@ -200,6 +198,19 @@ public class Jugador implements AccesoProfundidad {
     public List<Item> getInventario() {
         return inventario;
     }
+    public Zona getZonaActual() {
+        return zonaActual;
+    }
+    public void setZonaActual(Zona zonaActual) {
+        this.zonaActual = zonaActual;
+    }
+    public String getNombreZonaActual() {
+        return zonaActual.getNombre();
+    }
+    public RobotExcavador getRobot() {
+        return this.robot;
+    }
+
     public boolean isJuegoCompletado() {
         return juegoCompletado;
     }
@@ -216,16 +227,58 @@ public class Jugador implements AccesoProfundidad {
      * @param zona tipo: Zona; descripción: Zona actual del personaje.
      */
      public void profundidadActualizar(int profundidad_nueva, Zona zona){
-        if (profundidad_nueva < zona.getProfundidadMin() || profundidad_nueva > zona.getProfundidadMax()){
-            System.out.println("Esa profundidad está fuera del rango permitido de la zona.");
-        }
+         if (profundidad_nueva < 0){
+            System.out.println("No puedes subir más, ya estás en la superficie");
+         }
+
          int delta = Math.abs(profundidad_nueva - this.profundidadActual);
          double d = zona.normalizarProfundidad(profundidad_nueva);
          int costo = FormulaO2.cMover(d, delta);
 
          tanqueOxigeno.consumirO2(costo);
-         this.profundidadActual = profundidad_nueva;
-
          System.out.println("Movimiento a Profundidad: " + profundidad_nueva + " m, costo de O2: " + costo);
+         //Verificar si se quedó sin Oxígeno - Manejar Muerte de Jugador
+         if (this.getTanqueOxigeno().getOxigenoRestante() <= 0){
+             System.out.println("\n☠️ Te has quedado sin oxígeno durante la inmersión...");
+             System.out.println("Pierdes todo tu inventario y reapareces en la nave.");
+
+             //Vaciar inventario
+             this.vaciarInventario();
+
+             //Reaparecer en nave anclada
+             this.profundidadActual = nave.getProfundidadAnclaje();
+
+             //Determinar zona según profundidad del anclaje
+             Zona zonaActual = determinarZonaPorProfundidad(profundidadActual);
+             if (zonaActual != null){
+                 this.setZonaActual(zonaActual);
+                 zonaActual.entrar(this);
+             }
+         }
+         //Recargar Oxígeno
+         this.getTanqueOxigeno().recargarCompleto();
+         System.out.println("Has reaparecido en la nave anclada a " + profundidadActual + " m. Oxígeno recargado.");
+
+         //Verificar si la nueva profundidad está dentro del rango definido por la zona
+         if (profundidad_nueva < zonaActual.getProfundidadMin() || profundidad_nueva > zonaActual.getProfundidadMax()){
+             Zona nuevaZona = determinarZonaPorProfundidad(profundidad_nueva);
+             if (nuevaZona != null){
+                 System.out.println("Has entrado en una nueva zona: "+nuevaZona.getNombre() + "!");
+                 this.zonaActual = nuevaZona;
+                 nuevaZona.entrar(this);
+             } else {
+                 System.out.println("No existe ninguna zona en esa profundidad");
+             }
+         }
+
+         this.profundidadActual = profundidad_nueva;
+     }
+
+     private Zona determinarZonaPorProfundidad(int profundidad_nueva){
+         if (profundidad_nueva == 0) return Zonas.naveEstrellada;
+         if (profundidad_nueva > 0 && profundidad_nueva <= 199) return entorno.Zonas.arrecife;
+         if (profundidad_nueva >= 200 && profundidad_nueva <= 999) return entorno.Zonas.profunda;
+         if (profundidad_nueva >= 1000 && profundidad_nueva <= 1500) return entorno.Zonas.volcanica;
+         return null;
      }
 }
