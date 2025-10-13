@@ -4,6 +4,7 @@ import player.Jugador;
 import entorno.Zona;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -45,7 +46,7 @@ public class RobotExcavador extends Vehiculo{
     //*******************
 
     public void excavarRecursos(Jugador jugador){
-        if (averiado){
+        if (averiado ){
             System.out.println("El robot está averiado. Requiere reparación");
         }
         if (energia < 10){
@@ -67,8 +68,7 @@ public class RobotExcavador extends Vehiculo{
             return;
         }
 
-        int acciones = nivel; //Más nivel -> más acciones automáticas
-        for (int i = 0; i < acciones; i++){
+        while (activo){
             if (energia < 10 || cargaActual >= capacidad_carga) break;
 
             energia -= 10;
@@ -127,7 +127,7 @@ public class RobotExcavador extends Vehiculo{
     @Override
     public boolean puedeAcceder(int profundidad_minima){
         //Depende de la nave/jugador
-        return true;
+        return false;
     }
 
     @Override
@@ -135,7 +135,7 @@ public class RobotExcavador extends Vehiculo{
         if (contarEnBodega(tipo) < cantidad){
             System.out.println("El robot no tiene esa cantidad de "+tipo);
         }
-        eliminarDeBodega(tipo, cantidad);
+        retirarDeBodega(jugador, tipo, cantidad);
         jugador.agregarItem(tipo, cantidad);
         System.out.println("Transferidos "+cantidad+" de "+tipo + " al jugador");
     }
@@ -164,13 +164,20 @@ public class RobotExcavador extends Vehiculo{
 
     @Override
     public void retirarDeBodega(Jugador jugador, ItemTipo tipo, int cantidad) {
-        if (contarEnBodega(tipo) < cantidad){
-            System.out.println("El robot no tiene esa cantidad de "+tipo);
+        Iterator<Item> it = bodega.iterator();
+        while (it.hasNext()) {
+            Item item = it.next();
+            if (item.getTipo() == tipo) {
+                int nuevaCantidad = item.getCantidad() - cantidad;
+                if (nuevaCantidad <= 0) {
+                    // eliminación segura
+                    it.remove();
+                } else {
+                    item.setCantidad(nuevaCantidad);
+                }
+            }
         }
-        eliminarDeBodega(tipo,cantidad);
-        jugador.agregarItem(tipo, cantidad);
-        cargaActual -= cantidad;
-        System.out.println(" Retiraste " + cantidad + " de " + tipo + " del robot.");
+        System.out.println("No se encontró " + tipo + " en la bodega o no hay suficiente cantidad.");
     }
 
     //***********************
@@ -182,18 +189,6 @@ public class RobotExcavador extends Vehiculo{
             if (i.getTipo() == tipo) return i.getCantidad();
         }
         return 0;
-    }
-
-    private void eliminarDeBodega(ItemTipo tipo, int cantidad){
-        for (int i = 0; i < bodega.size(); i++){
-            Item item = bodega.get(i);
-            if (item.getTipo() == tipo) {
-                item.setCantidad(item.getCantidad() - cantidad);
-                if (item.getCantidad() <= 0) {
-                    bodega.remove(i);
-                }
-            }
-        }
     }
 
     //*******************
@@ -209,7 +204,7 @@ public class RobotExcavador extends Vehiculo{
         durabilidadMax += 25;
         durabilidad = durabilidadMax;
         capacidad_carga += 25;
-        System.out.println("⚙️ Robot mejorado a nivel " + nivel + ". Capacidad de carga: " + capacidad_carga + ".");
+        System.out.println("Robot mejorado a nivel " + nivel + ". Capacidad de carga mejorada un 25%: " + capacidad_carga + "Energía mejorada un 25%:" + energiaMax + "durabilidad mejorada un 25%:" + durabilidad);
     }
 
     //*******************

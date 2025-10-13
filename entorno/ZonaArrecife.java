@@ -21,9 +21,10 @@ public class ZonaArrecife extends Zona {
      */
     public ZonaArrecife() {
         this.nombre = "Zona Arrecife";
-        this.profundidadMin = 0;
+        this.profundidadMin = 1;
         this.profundidadMax = 199;
         rand = new Random();
+        this.presion = 0;
         this.recursos = EnumSet.of(
                 ItemTipo.CUARZO,
                 ItemTipo.SILICIO,
@@ -37,7 +38,7 @@ public class ZonaArrecife extends Zona {
      */
     @Override
     public void entrar(Jugador jugador) {
-        if (!jugador.puedeAcceder(profundidadMin)){
+        if (jugador.puedeAcceder(profundidadMin)){
             System.out.println("No puedes entrar a la Zona Arrecife");
             return;
         }
@@ -51,16 +52,16 @@ public class ZonaArrecife extends Zona {
      */
     @Override
     public void recolectarTipoRecurso(Jugador jugador, ItemTipo tipo) {
-        double d = normalizarProfundidad(jugador.getProfundidadActual());
-        double presion = FormulaO2.presion("ZonaArrecife",d, jugador.isMejoraTanque());
-        int costo = FormulaO2.cRecolectar(d, presion);
-
-        jugador.getTanqueOxigeno().consumirO2(costo);
+        if (!recursos.contains(tipo)){
+            System.out.println("Ese recurso no se encuentra en esta zona.");
+        }
 
         //Cambia la cantidad de loot con la zona (min:2; max:6)
+        double d = normalizarProfundidad(jugador.getProfundidadActual());
         int cantidad = cantidadLootRecolectar(d);
         jugador.agregarItem(tipo,cantidad);
-
+        int costo = FormulaO2.cRecolectar(jugador, this);
+        jugador.getTanqueOxigeno().consumirO2(costo);
         System.out.println("Recolectaste " + cantidad +" de " + tipo + " (costo O2: " + costo + ")");
     }
 
@@ -71,9 +72,7 @@ public class ZonaArrecife extends Zona {
     @Override
     public void explorarZona(Jugador jugador) {
         double d = normalizarProfundidad(jugador.getProfundidadActual());
-        double presion = FormulaO2.presion("ZonaArrecife",d,jugador.isMejoraTanque());
-        int costo = FormulaO2.cExplorar(d, presion);
-
+        int costo = FormulaO2.cExplorar(jugador, this);
         jugador.getTanqueOxigeno().consumirO2(costo);
         System.out.println("Exploras el colorido arrecife, lleno de vida marina");
         if (piezasTanque>0 && rand.nextDouble() < 0.3) {

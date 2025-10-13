@@ -16,7 +16,6 @@ import java.util.Random;
  * -Sin la mejora de tanque la presión hace efecto, una vez mejorado la presión suma 0 a la fórmula de oxígeno.
  */
 public class ZonaProfunda extends Zona {
-    private final int presion;
     private final Random rand;
 
     /**
@@ -42,11 +41,7 @@ public class ZonaProfunda extends Zona {
      */
     @Override
     public void entrar(Jugador jugador) {
-        if (!jugador.puedeAcceder(profundidadMin)) {
-            System.out.println("No puedes entrar a la Zona Profunda a nado.");
-            return;
-        }
-        System.out.println("Entrando en la Zona Profunda (200-999m)");
+        System.out.println("Entrando en la Zona Profunda (200-999m) Oscuridad y presión creciente");
     }
 
     /**
@@ -59,15 +54,16 @@ public class ZonaProfunda extends Zona {
         if (jugador.getProfundidadActual() > 500 && jugador.tieneModuloProfundidad()){
             System.out.println("No puedes recolectar más allá de 500 sin el modulo de profundidad.");
         }
+        if (!recursos.contains(tipo)) {
+            System.out.println("Ese tipo recurso no se encuentra en esta zona.");
+        }
 
         double d = normalizarProfundidad(jugador.getProfundidadActual());
-        double pres = FormulaO2.presion("ZonaProfunda",d,jugador.isMejoraTanque());
-        int costo = FormulaO2.cRecolectar(d,pres);
-        jugador.getTanqueOxigeno().consumirO2(costo);
-
         int cantidad = cantidadLootRecolectar(d);
-        jugador.agregarItem(tipo, cantidad);
-
+        jugador.agregarItem(tipo,cantidad);
+        int costo = FormulaO2.cRecolectar(jugador, this);
+        if (costo == Integer.MAX_VALUE) return;
+        jugador.getTanqueOxigeno().consumirO2(costo);
         System.out.println("Recolectaste " + cantidad +" de " + tipo + " (costo O2: " + costo + ")");
     }
 
@@ -82,8 +78,8 @@ public class ZonaProfunda extends Zona {
         }
 
         double d = normalizarProfundidad(jugador.getProfundidadActual());
-        double presion = FormulaO2.presion("ZonaProfunda",d,jugador.isMejoraTanque());
-        int costo = FormulaO2.cRecolectar(d,presion);
+        int costo = FormulaO2.cExplorar(jugador, this);
+        if (costo == Integer.MAX_VALUE) return;
         jugador.getTanqueOxigeno().consumirO2(costo);
 
         var listaRecursos = new ArrayList<>(recursos);
@@ -91,7 +87,11 @@ public class ZonaProfunda extends Zona {
         int cantidad = cantidadLootExploracion(d);
 
         jugador.agregarItem(encontrado, cantidad);
-        System.out.println("Exploraste grietas abisales y hallaste " + cantidad + " de " + encontrado + " (O₂ -" + costo + ")");
+        System.out.printf(
+                "Exploraste grietas abisales y hallaste %d de %s (Costo O2: %d)%n",
+                cantidad, encontrado, costo
+        );
+
     }
 
     // ****************************************
@@ -129,5 +129,9 @@ public class ZonaProfunda extends Zona {
      */
     private int cantidadLootExploracion(double d) {
         return Math.max(1,(int)Math.floor(2*d));
+    }
+
+    public double getPresion() {
+        return presion;
     }
 }

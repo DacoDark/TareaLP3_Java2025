@@ -1,7 +1,6 @@
 package objetos;
 
 import player.Jugador;
-import objetos.Item;
 import java.util.List;
 
 /**

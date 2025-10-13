@@ -1,53 +1,73 @@
 package player;
 
+import entorno.*;
 /**
  * Contiene las fórmulas para calcular consumo de O2
  */
 public class FormulaO2 {
 
-    /**
-     * Costo de explorar
-     * @param d double
-     * @param presion double
-     * @return cantidad de oxígeno consumido por explorar
-     */
-    public static int cExplorar(double d, double presion) {
-        return (int) Math.ceil(12 + (10*d) + presion);
+
+    public static int cExplorar(Jugador jugador, Zona zona) {
+        double d = calcularProfundidadNormalizada(jugador, zona);
+        double pres = calcularPresion(jugador, zona, d);
+
+        if (Double.isInfinite(pres)){
+            return Integer.MAX_VALUE;
+        }
+        double costo = 12 + 10 * d + pres;
+        //System.out.printf("[DEBUG EXPLORAR] d=%.3f pres=%.3f costo=%.3f%n", d, pres, costo);
+        return (int) Math.ceil(costo);
     }
 
-    /**
-     * Costo de recolectar
-     * @param d double
-     * @param presion  double
-     * @return cantidad de oxigeno consumido por recolectar
-     */
-    public static int cRecolectar(double d, double presion) {
-        return (int) Math.ceil(10 + ( 6*d ) + presion);
+
+    public static int cRecolectar(Jugador jugador, Zona zona) {
+        double d = calcularProfundidadNormalizada(jugador, zona);
+        double presion = calcularPresion(jugador,zona,d);
+
+        if (Double.isInfinite(presion)){
+            return Integer.MAX_VALUE;
+        }
+        double costo = 10 + 6 * d + presion;
+        //System.out.printf("[DEBUG RECOLECTAR] d=%.3f pres=%.3f costo=%.3f%n", d, presion, costo);
+        return (int) Math.ceil(costo);
     }
 
-    /**
-     * Costo de Mover
-     * @param d double
-     * @param delta_profundidad int
-     * @return int
-     */
-    public static int cMover(double d, int delta_profundidad) {
-        return (int) Math.ceil((3 + (3*d)) * (delta_profundidad/ 50.0));
+    public static int cMover(Jugador jugador, Zona zona, int deltaZ) {
+        // Profundidad actual
+        double z = jugador.getProfundidadActual();
+        // Normalizamos
+        double d = (z - zona.getProfundidadMin()) / Math.max(1.0, zona.getProfundidadMax() - zona.getProfundidadMin());
+        d = Math.min(Math.max(d, 0), 1); // asegurar rango [0,1]
+
+        double costo = 3 + 3 * d * (Math.abs(deltaZ) / 50.0);
+        //System.out.printf("[DEBUG] z=%.1f, Δz=%d, d=%.3f, costo=%.3f%n", z, deltaZ, d, costo);
+
+        return (int) Math.ceil(costo);
+    }
+    private static double calcularProfundidadNormalizada(Jugador jugador, Zona zona) {
+        double z = jugador.getProfundidadActual();
+        double d = (z - zona.getProfundidadMin()) / Math.max(1.0, zona.getProfundidadMax() - zona.getProfundidadMin());
+        d = Math.min(Math.max(d, 0), 1);
+        return d;
     }
 
-    /**
-     * Calcula presión según zona y estado del tanque
-     * @param zona String
-     * @param d double
-     * @param mejoraTanque boolean
-     * @return Cantidad de presión asignada según zona y estado de tanque.
-     */
-    public static double presion(String zona, double d, boolean mejoraTanque){
-        if (mejoraTanque) return 0;
-        return switch (zona) {
-            case "ZonaProfunda" -> 10 + 6 * d;
-            case "ZonaVolcanica" -> Double.POSITIVE_INFINITY;
-            default -> 0;
-        };
+    private static double calcularPresion(Jugador jugador,Zona zona, double d) {
+        //Se elimina la presion si tiene la mejora del tanque
+        if (jugador.isMejoraTanque()) return 0.0;
+
+        //Arrecife o Nave estrellada, no tiene presión
+        if (zona instanceof ZonaArrecife || zona instanceof NaveEstrellada) {
+            return 0.0;
+        }
+
+        if (zona instanceof ZonaProfunda profunda) {
+            return profunda.getPresion() + 6 * d;
+        }
+
+        if (zona instanceof ZonaVolcanica) {
+            return Double.POSITIVE_INFINITY;
+        }
+
+        return 0.0;
     }
 }

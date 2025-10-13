@@ -36,7 +36,6 @@ public class NaveEstrellada extends Zona {
             repararNave(jugador);
         } else {
             System.out.println("Aún no tienes los planos necesarios para reparar la nave.");
-            System.out.println("Puedes intentar explorar el interior para buscar piezas o el módulo de profundidad, pero hazlo rápido, sin un traje térmico te calcinaras vivo...");
         }
     }
 
@@ -67,19 +66,42 @@ public class NaveEstrellada extends Zona {
         if (!jugador.isTrajeTermico()) {
             if (exploracionLimitada) {
                 System.out.println("El calor te abruma... no puedes seguir explorando sin un traje térmico.");
+                System.out.println("Te desmayas...");
+                System.out.println("Pierdes todo tu inventario y reapareces en la nave.");
+
+                //Vaciar inventario
+                jugador.vaciarInventario();
+
+                //Reaparecer en nave anclada
+                jugador.setProfundidadActual(jugador.getNave().getProfundidadAnclaje());
+
+                //Determinar zona según profundidad del anclaje
+                Zona zonaActual = jugador.determinarZonaPorProfundidad(jugador.getNave().getProfundidadAnclaje());
+                if (zonaActual != null){
+                    jugador.setZonaActual(zonaActual);
+                    zonaActual.entrar(jugador);
+                }
+
+                //Recargar Oxígeno
+                jugador.getTanqueOxigeno().recargarCompleto();
+                System.out.println("Has reaparecido en la nave anclada a " + jugador.getNave().getProfundidadAnclaje() + " m. Oxígeno recargado.");
+
                 return;
             }
             exploracionLimitada = true;
         }
 
         System.out.println("Explorando el interior de la nave estrellada...");
+        //System.out.println("[DEBUG] explorando con jugador hash: " + jugador.hashCode());
+
         // No hay consumo de O2 en esta zona
 
         // 25% de encontrar el MÓDULO DE PROFUNDIDAD
         if (!moduloEncontrado && rand.nextDouble() < 0.25) {
             jugador.agregarItem(ItemTipo.MODULO_PROFUNDIDAD, 1);
             moduloEncontrado = true;
-            System.out.println("⚙️  ¡Encontraste el MÓDULO DE PROFUNDIDAD! Tu nave ahora podrá descender más allá de 1000 m.");
+            System.out.println("¡Encontraste el MÓDULO DE PROFUNDIDAD! Tu nave ahora podrá descender más allá de 1000 m cuando lo instales.");
+            //System.out.println("[DEBUG] inventario ahora tiene MODULO_PROFUNDIDAD = " + jugador.contarItem(ItemTipo.MODULO_PROFUNDIDAD));
         } else {
             // Loot genérico si tiene traje térmico
             if (jugador.isTrajeTermico()) {

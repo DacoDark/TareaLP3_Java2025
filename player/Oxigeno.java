@@ -1,7 +1,5 @@
 package player;
 
-import entorno.Zona;
-
 public class Oxigeno {
     private int oxigenoRestante;
     private int capacidadMaxima;

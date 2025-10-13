@@ -2,7 +2,6 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.List;
 
-import entorno.NaveEstrellada;
 import player.Jugador;
 import player.Oxigeno;
 import objetos.Item;
@@ -20,23 +19,29 @@ public class Main {
         //Instancias principales
         Oxigeno oxigeno = new Oxigeno(60);
         Jugador jugador = new Jugador(oxigeno);
+        //System.out.println("[DEBUG] instancia jugador hash: " + jugador.hashCode());
         NaveExploradora nave = new NaveExploradora();
+        //enlazamos la nave al jugador
+        jugador.setNave(nave);
 
         //El juego comienza aquí
         Zona zonaActual = Zonas.naveEstrellada;
         boolean enNave = true;      //Jugador inicia dentro de la nave exploradora
         boolean jugando = true;
 
+
+
         System.out.println("=== Exploración Subacuática - Inicio ===");
         System.out.println("Comienzas en la Nave Estrellada (0 m)");
 
         //Mostramos la entrada inicial de la zona
         zonaActual.entrar(jugador);
+        System.out.println("Puedes intentar explorar el interior para buscar piezas o el módulo de profundidad, pero hazlo rápido, sin un traje térmico te calcinaras vivo...");
 
         while (jugando) {
             try {
                 System.out.println("\n---------------------------------------");
-                System.out.println("Zona actual: " + zonaActual.getClass().getSimpleName()
+                System.out.println("Zona Nave anclada: " + jugador.getNave().getZonaAnclajeActual().getNombre()
                         + " | Jugador " + (enNave ? "dentro de la nave" : "en el agua"));
                 System.out.println("---------------------------------------");
 
@@ -51,9 +56,8 @@ public class Main {
                     System.out.println("5. Guardar objetos en bodega");
                     System.out.println("6. Retirar objetos en bodega");
                     System.out.println("7. Abrir el menú de crafteo");
-                    System.out.println("8. Viajar / salir al agua");
-                    System.out.println("9. Gestionar robot excavador");
-                    System.out.println("10. Salir del juego");
+                    System.out.println("8. Salir al agua");
+                    System.out.println("9. Salir del juego");
                     System.out.print("Opción: ");
                     int opcion = sc.nextInt();
 
@@ -63,6 +67,7 @@ public class Main {
                             System.out.print("Nueva profundidad de anclaje: ");
                             int profundidad = sc.nextInt();
                             nave.anclarNaveExploradora(profundidad);
+                            jugador.setProfundidadActual(profundidad);
                         }
                         case 3 -> jugador.verInventario();
                         case 4 -> nave.verBodega();
@@ -86,62 +91,13 @@ public class Main {
                         }
                         case 7 -> nave.menuCrafteo(jugador); //Se implementa el crafteo desde la nave
                         case 8 -> {
-                            System.out.println("1. Salir al agua en la zona actual");
-                            System.out.println("2. Viajar a otra zona");
-                            int subopcion = sc.nextInt();
-
-                            if (subopcion == 1) {
-                                int profSalida = nave.getProfundidadAnclaje();
-                                jugador.profundidadActualizar(profSalida, zonaActual);
-                                enNave = false;
-                                System.out.println("Has salido al agua en " + profSalida + " m.");
-                            } else {
-                                System.out.println("Elige destino:");
-                                System.out.println("1. Arrecife (0–199)");
-                                System.out.println("2. Profunda (200–999)");
-                                System.out.println("3. Volcánica (1000–1500)");
-                                System.out.println("4. Nave Estrellada (0 m)");
-                                int destino = sc.nextInt();
-
-                                Zona candidata = switch (destino) {
-                                    case 1 -> Zonas.arrecife;
-                                    case 2 -> Zonas.profunda;
-                                    case 3 -> Zonas.volcanica;
-                                    case 4 -> Zonas.naveEstrellada;
-                                    default -> zonaActual;
-                                };
-
-                                boolean puede = nave.puedeAcceder(candidata.getProfundidadMin())
-                                        || jugador.puedeAcceder(candidata.getProfundidadMin());
-
-                                if (puede) {
-                                    zonaActual = candidata;
-                                    zonaActual.entrar(jugador);
-
-                                    if (jugador.isJuegoCompletado()) {
-                                        System.out.println("🚀 ¡Has completado la misión!");
-                                        jugando = false;
-                                    }
-                                } else {
-                                    System.out.println("La nave no puede acceder a esa profundidad.");
-                                }
-                            }
+                            System.out.println("Salir al agua en la zona actual");
+                            int profSalida = nave.getProfundidadAnclaje();
+                            jugador.profundidadActualizar(profSalida, jugador.getZonaActual());
+                            enNave = false;
+                            System.out.println("Has salido al agua en " + profSalida + " m.");
                         }
                         case 9 -> {
-                            System.out.println("1. Excavar recursos automáticamente");
-                            System.out.println("2. Descargar recursos en nave");
-                            System.out.println("3. Reparar robot");
-                            System.out.println("4. Mejorar robot");
-                            int opRobot = sc.nextInt();
-
-                            switch (opRobot) {
-                                case 1 -> jugador.getRobot().excavarRecursos(jugador);
-                                case 2 -> jugador.getRobot().descargarEnNave(nave);
-                                case 3 -> jugador.getRobot().reparar();
-                                case 4 -> jugador.getRobot().mejorar();
-                            }
-                        }
-                        case 10 -> {
                             jugando = false;
                             System.out.println("Saliendo del juego...");
                         }
@@ -167,24 +123,32 @@ public class Main {
                         case 2:
                             System.out.print("Ingrese nueva profundidad (m): ");
                             int nuevaProf = sc.nextInt();
-                            jugador.profundidadActualizar(nuevaProf, zonaActual);
+                            jugador.profundidadActualizar(nuevaProf, jugador.getZonaActual());
                             break;
 
                         case 3:
-                            mostrarOpcionesRecolectar(zonaActual);
+                            mostrarOpcionesRecolectar(jugador.getZonaActual());
                             System.out.print("Elige recurso: ");
                             int r = sc.nextInt();
-                            ItemTipo tipo = mapearOpcionARecurso(zonaActual, r);
-                            if (tipo != null) zonaActual.recolectarTipoRecurso(jugador, tipo);
+                            ItemTipo tipo = mapearOpcionARecurso(jugador.getZonaActual(), r);
+                            if (tipo != null) jugador.getZonaActual().recolectarTipoRecurso(jugador, tipo);
                             break;
 
                         case 4:
-                            zonaActual.explorarZona(jugador);
+                            jugador.getZonaActual().explorarZona(jugador);
                             break;
 
                         case 5:
+                            //Jugador decide volver a la nave
                             enNave = true;
+                            //Recarga su oxígeno
                             jugador.getTanqueOxigeno().recargarCompleto();
+                            //Su nueva zona es la zona donde está anclada la nave.
+                            //Obtenemos la profundidad de la nave
+                            int nueva_profundidad = jugador.getNave().getProfundidadAnclaje();
+                            //Actualizamos la profundidad del jugador con la profundidad de la nave
+                            jugador.profundidadActualizar(nueva_profundidad, jugador.getZonaActual());
+                            // System.out.print("[DEBUG] La profundidad del jugador es: "+ jugador.getProfundidadActual() + " y al volver debería ser: " + jugador.getNave().getProfundidadAnclaje());
                             System.out.println("Regresaste a la nave.");
                             break;
 
@@ -193,18 +157,30 @@ public class Main {
                     }
 
                     // Condición de derrota: O2 = 0
-                    if (jugador.getTanqueOxigeno().getOxigenoRestante() <= 0) {
-                        System.out.println("\n¡Te has quedado sin oxígeno! Pierdes inventario y reapareces en la nave.");
-                        //Eliminar inventario
-                        //jugador.vaciarInventario();
+                    if (jugador.getTanqueOxigeno().getOxigenoRestante() <= 0){
+                        System.out.println("Te has quedado sin oxígeno durante la inmersión...");
+                        System.out.println("Pierdes todo tu inventario y reapareces en la nave.");
                         enNave = true;
+                        //Vaciar inventario
+                        jugador.vaciarInventario();
+
+                        //Reaparecer en nave anclada
+                        jugador.setProfundidadActual(nave.getProfundidadAnclaje());
+
+                        //Determinar zona según profundidad del anclaje
+                        Zona nuevaZona = jugador.getNave().getZonaAnclajeActual();
+                        jugador.setZonaActual(nuevaZona);
+
+                        //Recargar Oxígeno
                         jugador.getTanqueOxigeno().recargarCompleto();
+                        System.out.println("Has reaparecido en la nave anclada a " + jugador.getNave().getProfundidadAnclaje() + " m. Oxígeno recargado.");
                     }
-                }
-                // Verificación de victoria final (reparación completada en NaveEstrellada)
-                if (zonaActual instanceof NaveEstrellada && jugador.isJuegoCompletado()) {
-                    System.out.println("\n ¡Has reparado la nave y completado el juego!");
-                    jugando = false;
+
+                    //Condición Victoria
+                    if (jugador.isJuegoCompletado()) {
+                        System.out.println("🚀 ¡Has completado la misión!");
+                        jugando = false;
+                    }
                 }
             } catch (InputMismatchException e) {
                 sc.nextLine();

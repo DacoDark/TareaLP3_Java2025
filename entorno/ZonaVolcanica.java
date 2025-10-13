@@ -38,7 +38,7 @@ public class ZonaVolcanica extends Zona {
     @Override
     public void entrar(Jugador jugador) {
         //Validación global
-        if (!jugador.puedeAcceder(profundidadMin)){
+        if (jugador.puedeAcceder(profundidadMin)){
             System.out.println("No es seguro, faltan requisitos para entrar a la Zona Volcánica, por tu seguridad mejor vuelve.");
             return;
         }
@@ -53,9 +53,7 @@ public class ZonaVolcanica extends Zona {
     @Override
     public void recolectarTipoRecurso(Jugador jugador, ItemTipo tipo) {
         double d = normalizarProfundidad(jugador.getProfundidadActual());
-        double presion = FormulaO2.presion("ZonaVolcanica",d, jugador.isMejoraTanque());
-        int costo = FormulaO2.cRecolectar(d, presion);
-
+        int costo = FormulaO2.cRecolectar(jugador, this);
         jugador.getTanqueOxigeno().consumirO2(costo);
 
         //Cambia la cantidad de loot con la zona (min:3; max:8)
@@ -72,13 +70,13 @@ public class ZonaVolcanica extends Zona {
     @Override
     public void explorarZona(Jugador jugador) {
         double d = normalizarProfundidad(jugador.getProfundidadActual());
-        double presion = FormulaO2.presion("ZonaVolcanica",d, jugador.isMejoraTanque());
-        int costo = FormulaO2.cExplorar(d, presion);
-
+        int costo = FormulaO2.cExplorar(jugador, this);
         jugador.getTanqueOxigeno().consumirO2(costo);
+
         System.out.println("Te acercas a un pequeño crater humeante, el calor es abrasador...");
         if (!planoEncontrado && rand.nextDouble() < 0.15) {
             setPlanoEncontrado();
+            jugador.setTienePlanos();
             jugador.agregarItem(ItemTipo.PLANO_NAVE,1);
             System.out.println("¡Encontraste El Plano de las Nave! Ahora podrás repararla (Costo O2: " + costo + ")");
         } else {

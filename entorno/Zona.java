@@ -13,6 +13,7 @@ public abstract class Zona {
     protected int profundidadMin;
     protected int profundidadMax;
     protected EnumSet<ItemTipo> recursos;
+    protected int presion;
 
     public abstract void entrar(Jugador jugador);
 

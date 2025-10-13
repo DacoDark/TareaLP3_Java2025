@@ -1,7 +1,7 @@
 package objetos;
 
 /**
- * Enumeración de todos los tipos de ítems encontrables en el juego
+ * Enumeración de todos los tipos de ítems en el juego
  */
 public enum ItemTipo {
     CUARZO,
