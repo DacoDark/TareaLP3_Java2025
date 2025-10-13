@@ -3,7 +3,6 @@ package entorno;
 import player.Jugador;
 import player.FormulaO2;
 import objetos.ItemTipo;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Random;

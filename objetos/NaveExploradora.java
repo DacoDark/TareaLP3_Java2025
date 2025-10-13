@@ -123,6 +123,11 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
     //*******************
     //*     Crafteo     *
     //*******************
+
+    /**
+     * Función que despliega el menú de creación de objetos, en está parte se maneja todo lo que tenga que ver con upgrades del personaje.
+     * @param jugador tipo: Jugador; descripción: personaje que juega el juego.
+     */
     public void menuCrafteo(Jugador jugador){
         Scanner sc = new Scanner(System.in);
         System.out.println("\n=== Menu Crafteo ===");
@@ -194,7 +199,10 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         }
     }
 
-
+    /**
+     * Función que permite fabricar el traje termico dado los ingredientes necesarios
+     * @param jugador tipo: Jugador; descripción: personaje que juega el juego.
+     */
     private void fabricarTrajeTermico(Jugador jugador){
         if (jugador.isTrajeTermico()){
             System.out.println("Ya tienes un traje térmico");
@@ -210,6 +218,10 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         }
     }
 
+    /**
+     * Función que permite fabricar la mejora del tanque del jugador.
+     * @param jugador tipo: Jugador; descripción: personaje que juega el juego.
+     */
     private void mejorarTanque(Jugador jugador){
         if (jugador.isMejoraTanque()){
             System.out.println("Ya tienes un mejora tanque");
@@ -224,6 +236,10 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         }
     }
 
+    /**
+     * Función que permite mejorar la capacidad del Tanque de Oxígeno, para tener expediciones más largas.
+     * @param jugador tipo: Jugador; descripción: Personaje que juega el juego.
+     */
     private void mejorarTanqueOxigeno(Jugador jugador){
         if (jugador.isMejoraTanque()){
             System.out.println("Necesitas mejorar el tanque primero");
@@ -232,12 +248,16 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
             consumirDeBodega(ItemTipo.PLATA,10);
             consumirDeBodega(ItemTipo.CUARZO,15);
             jugador.getTanqueOxigeno().aumentarOxigeno(30);
-            System.out.println("Tanque de oxígeno mejorado, Ahora no sufrirás los efectos de la presión, Capacidad aumentada en un 100%.");
+            System.out.println("Tanque de oxígeno mejorado, Capacidad aumentada en un 50%.");
         } else {
             System.out.println("Materiales insuficientes para mejorar la capacidad de oxígeno necesitas: \n(10 Plata,15 Cuarzo)");
         }
     }
 
+    /**
+     * Función que permite hacer la instalación del módulo de profundidad, para poder superar los 500 m
+     * @param jugador tipo: Jugador; descripción: personaje que juega el juego
+     */
     private void instalarModuloProfundidad(Jugador jugador){
         if (jugador.tieneModuloProfundidad()){
             System.out.println("Ya tienes el modulo de profundidad instalado");
@@ -250,6 +270,10 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         }
     }
 
+    /**
+     * Función que permite fabricar al robot excavador y se le asigna al personaje.
+     * @param jugador tipo: Jugador; descripción: personaje que juega el juego.
+     */
     private void ensamblarRobotExcavador(Jugador jugador){
         if (tieneMateriales(ItemTipo.COBRE,15,ItemTipo.MAGNETITA,10,ItemTipo.DIAMANTE,5,ItemTipo.ACERO,20)){
             consumirDeBodega(ItemTipo.COBRE,15);
@@ -267,6 +291,11 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
     //*     Auxiliares de Bodega    *
     //*******************************
 
+    /**
+     * Función para identificar los materiales que se necesitan y se tienen en el inventario para construir/mejorar cosas.
+     * @param args tipo: args; descripción: Cantidad de argumentos que se pueden colocar, esto dependen de las zonas.
+     * @return tipo: boolean; descripción: Retorna valor booleano si es que el jugador tiene las cantidades mencionadas en su inventario.
+     */
     private boolean tieneMateriales(Object... args){
         for (int i = 0; i < args.length; i += 2){
             ItemTipo tipo = (ItemTipo) args[i];
@@ -278,6 +307,11 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         return true;
     }
 
+    /**
+     * Función para eliminar elementos de la bodega
+     * @param tipo tipo: ItemTipo; descripción: tipo del item que se va a eliminar de la bodega
+     * @param cantidad tipo: int; descripción: número entero de la cantidad del tipo a eliminar de la bodega.
+     */
     private void consumirDeBodega(ItemTipo tipo, int cantidad) {
         Iterator<Item> it = bodega.iterator();
         while (it.hasNext()) {
@@ -295,7 +329,11 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         System.out.println("No se encontró " + tipo + " en la bodega o no hay suficiente cantidad.");
     }
 
-
+    /**
+     * Función para contar los items que se tienen guardados en bodega
+     * @param tipo tipo: ItemTipo; descripción: Tipo del item del cual se quiere saber la cantidad
+     * @return tipo: int; descripción: número entero de la cantidad que se encuentra en bodega.
+     */
     private int contarEnBodega(ItemTipo tipo){
         for (Item i : bodega){
             if (i.getTipo() == tipo)
@@ -313,11 +351,18 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         private boolean activo;
         private int profundidad_extra;
 
+        //***************************************************
+        //*     Método Constructor de la clase anidada      *
+        //***************************************************
         public ModuloProfundidad(){
             this.activo = false;
             this.profundidad_extra = 0;
         }
 
+        /**
+         * Función que determina que una vez instalado el módulo, se pueda extender la profundidad de la nave.
+         * @param profundidadExtra tipo: int; descripción: Cantidad de profundidad la cual se va a agregar a la nave
+         */
         public void aumentarProfundidad(int profundidadExtra) {
             if (!activo) {
                 this.profundidad_extra = profundidadExtra;
@@ -326,10 +371,18 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
             }
         }
 
+        /**
+         * Función que retorna el valor de verdad, si está instalado el módulo o no.
+         * @return tipo: boolean; descripción: Valor de verdad que significa si está instalado el módulo de profundidad en la nave
+         */
         public boolean isActivo(){
             return activo;
         }
 
+        /**
+         * Función para obtener la profundidad máxima de una zona
+         * @return tipo: int; descripción: Cantidad entera de la profundidad extra.
+         */
         public int getProfundidadExtra(){
             return profundidad_extra;
         }

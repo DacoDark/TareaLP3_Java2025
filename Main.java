@@ -191,10 +191,14 @@ public class Main {
         System.out.println("Fin del juego.");
     }
 
-    /**
-     * Métodos auxiliares para recursos según zonas
-     */
+    //*******************************************************
+    //*     Métodos auxiliares para recursos según zonas    *
+    //*******************************************************
 
+    /**
+     * Función para discernir entre los recursos disponibles de una zona.
+     * @param zona tipo: Zona; descripción: Recibe por parámetro la zona en la que se quiere recolectar los recursos
+     */
     private static void mostrarOpcionesRecolectar(Zona zona){
         String cls = zona.getClass().getSimpleName();
         System.out.println("Recursos disponibles: ");
@@ -207,6 +211,12 @@ public class Main {
         }
     }
 
+    /**
+     * Función para elegir un recurso específico de una zona y poder recolectarlo.
+     * @param zona tipo: Zona; descripción: Zona de la cual se quiere extraer el recurso
+     * @param opcion tipo: int; descripción: número que elegirá el recurso que se quiere extraer de la zona.
+     * @return tipo: ItemTipo; descripción: Tipo del recurso que se quiere extraer.
+     */
     private static ItemTipo mapearOpcionARecurso(Zona zona,int opcion){
         return switch ( zona.getClass().getSimpleName() ){
             case "ZonaArrecife" -> switch (opcion){
@@ -238,6 +248,13 @@ public class Main {
         };
     }
 
+    /**
+     * Función para escoger items del inventario.
+     * @param jugador tipo: Jugador; descripción: Jugador que juega el juego.
+     * @param nave tipo: Nave; descripción: Nave en donde se encuentra el jugador
+     * @param desdeBodega tipo: boolean; descripción: booleano que determina si se está en la bodega o en el inventario del jugador.
+     * @return tipo: ItemTipo; descripción: retorna el ItemTipo seleccionado ya sea de la bodega o del inventario.
+     */
     public static ItemTipo seleccionarItemTipo(Jugador jugador, NaveExploradora nave, boolean desdeBodega) {
         System.out.println("\n=== Selección de Ítem ===");
         List<Item> fuente = desdeBodega ? nave.getBodega() : jugador.getInventario();

@@ -9,12 +9,16 @@ import java.util.Random;
 
 /**
  * Zona Nave Estrellada (Bimodal 0m)
+ * Recursos: Cables, Piezas_Metal y modulo
  */
 public class NaveEstrellada extends Zona {
     private boolean moduloEncontrado;
     private boolean exploracionLimitada = false;
     private final Random rand;
 
+    /**
+     * Constructor de la clase
+     */
     public NaveEstrellada() {
         this.nombre = "Nave Estrellada";
         this.profundidadMin = 0;
@@ -27,6 +31,10 @@ public class NaveEstrellada extends Zona {
         );
     }
 
+    /**
+     * Función que verifica si el jugador puede entrar a la zona.
+     * @param jugador tipo: Jugador; Descripción: Personaje que juega el juego.
+     */
     @Override
     public void entrar(Jugador jugador) {
         System.out.println("Te encuentras en la Nave Estrellada, está en llamas 🔥🔥🔥 y en cualquier momento puede explotar!.");
@@ -39,10 +47,15 @@ public class NaveEstrellada extends Zona {
         }
     }
 
+    /**
+     * Función que recolecta objetos dado un tipo específico que se busca
+     * @param jugador tipo: Jugador; Descripción: Personaje que juega el juego
+     * @param itemTipo tipo: ItemTipo; Descripción: Tipo del item que quiere encontrar.
+     */
     @Override
     public void recolectarTipoRecurso(Jugador jugador, ItemTipo itemTipo) {
         if (!jugador.isTrajeTermico()) {
-            System.out.println("El calor extremo no te permite recolectar nada... ☠");
+            System.out.println("El calor extremo no te permite recolectar nada...");
             exploracionLimitada = true;
             return;
         }
@@ -56,6 +69,10 @@ public class NaveEstrellada extends Zona {
         }
     }
 
+    /**
+     * Función que explora la zona por objetos únicos y en caso de no encontrar adquiere objetos aleatorios de la zona
+     * @param jugador tipo: Jugador; Descripción: Personaje que juega el juego
+     */
     @Override
     public void explorarZona(Jugador jugador) {
         if (jugador.isTienePlanos()) {
@@ -117,7 +134,7 @@ public class NaveEstrellada extends Zona {
     }
 
     /**
-     * Función para reparar la Nave.
+     * Función para reparar la Nave y ganar el juego, verifica que se tengan los materiales necesarios, se consumen y se termina el juego.
      * @param jugador tipo: Jugador; descripción: Jugador que juega el juego.
      */
     private void repararNave(Jugador jugador) {

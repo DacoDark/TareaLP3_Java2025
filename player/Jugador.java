@@ -3,12 +3,11 @@ package player;
 import entorno.Zonas;
 import objetos.*;
 import entorno.Zona;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Representa al jugador
+ * Representa al jugador personaje principal del juego
  */
 public class Jugador implements AccesoProfundidad {
     private final Oxigeno tanqueOxigeno;
@@ -43,7 +42,7 @@ public class Jugador implements AccesoProfundidad {
     //*******************************************
 
     /**
-     * Imprime por pantalla el estado del jugador
+     * Imprime por pantalla el estado del jugador y de su robot en caso de tener uno.
      */
     public void verEstadoJugador(){
         System.out.println("\n===   Estado Jugador  ===");
@@ -64,10 +63,17 @@ public class Jugador implements AccesoProfundidad {
             System.out.printf("Carga: %d / %d%n", robot.getCargaActual(), robot.getCapacidad_carga());
             System.out.println("Estado: " + (robot.isAveriado() ? "Dañado" : "Operativo"));
         } else {
-            System.out.println("\n🤖 No tienes un robot excavador asignado.");
+            System.out.println("\nNo tienes un robot excavador asignado.");
         }
     }
 
+    /**
+     * Función que verifica si tiene las mejoras para poder acceder a zonas más profundas.
+     * Para pasar de 500 m en la zona profunda, necesita la mejora del módulo. (no es necesario, pero recomendable mejorar la capacidad del tanque)
+     * Para acceder a la zona Volcanica necesita la mejora del tanque y el traje termico(decisión propia que le da sentido al juego).
+     * @param profundidad_minima tipo: int; descripción: Profundidad a la que se quiere acceder
+     * @return tipo: boolean; descripción: Retorna el valor de verdad si cumple las condiciones necesarias de la zona. (lógica invertida para simplificar la validación)
+     */
     @Override
     public boolean puedeAcceder(int profundidad_minima) {
         if(profundidad_minima >= 1000){
@@ -75,7 +81,7 @@ public class Jugador implements AccesoProfundidad {
             return !this.mejoraTanque || !this.trajeTermico;
         } else if (profundidad_minima >= 500) {
             // Zona Profunda
-            return !this.mejoraTanque;
+            return !this.moduloInstalado;
         } else {
             //Arrecife y Nave estrellada
             return false;
@@ -121,8 +127,9 @@ public class Jugador implements AccesoProfundidad {
                 int nueva_cantidad = item.getCantidad() - cantidad;
                 if (nueva_cantidad <= 0) {
                     inventario.remove(i);
+                    break;
                 } else item.setCantidad(nueva_cantidad);
-                System.out.println("[DEBUG] eliminado " + tipo + " x" + cantidad);
+                //System.out.println("[DEBUG] eliminado " + tipo + " x" + cantidad);
             }
         }
     }
@@ -159,70 +166,175 @@ public class Jugador implements AccesoProfundidad {
      */
     public void vaciarInventario(){
         inventario.clear();
-        System.out.println("[DEBUG] vaciarInventario -> inventario vaciado");
+        //System.out.println("[DEBUG] vaciarInventario ->" + verInventario());
     }
 
     //***********************************
     //* Getter y Setters del jugador    *
     //***********************************
+
+    /**
+     * Getter del Tanque de oxigeno
+     * @return tipo: Oxígeno; descripción: Devuelve el oxígeno que tendrá el personaje
+     */
     public Oxigeno getTanqueOxigeno() {
         return tanqueOxigeno;
     }
+
+    /**
+     * Getter de la Profundidad actual
+     * @return tipo: int; descripción: Devuelve el número de la profundidad en la que se encuentra el personaje
+     */
     public int getProfundidadActual() {
         return profundidadActual;
     }
+
+    /**
+     * Setter de la profundidad actual
+     * @param profundidadActual tipo: int; descripción: profundidad actual del personaje en la cual se va a registrar.
+     */
     public void setProfundidadActual(int profundidadActual) { this.profundidadActual = profundidadActual; }
+
+    /**
+     * Función que pregunta por si tiene el módulo instalado y actualiza la bandera de progreso.
+     * @return tipo: boolean; descripción: Valor de verdad sobre sí se ha instalado el módulo en la nave.
+     */
     public boolean tieneModuloProfundidad(){
         if (nave.getModuloProfundidad().isActivo()){
             setModuloInstalado(true);
         }
         return moduloInstalado;
     }
+
+    /**
+     * Setter del Modulo
+     * @param valor tipo: boolean; descripción: Valor de verdad sobre el módulo instalado, setea la bandera de progreso.
+     */
     public void setModuloInstalado(boolean valor) {
         this.moduloInstalado = valor;
     }
+
+    /**
+     * Función que pregunta si el jugador posee la mejora del tanque instalada.
+     * @return tipo: boolean; descripción: Valor de verdad sobre si el jugador cuenta con la mejora del tanque.
+     */
     public boolean isMejoraTanque() {
         return mejoraTanque;
     }
+
+    /**
+     * Función que asigna el estado de mejora del tanque.
+     * @param mejoraTanque tipo: boolean; descripción: Valor que define si el tanque ha sido mejorado o no.
+     */
     public void setMejoraTanque(boolean mejoraTanque) {
         this.mejoraTanque = mejoraTanque;
     }
+
+    /**
+     * Función que pregunta si el jugador tiene el traje térmico equipado.
+     * @return tipo: boolean; descripción: Valor de verdad sobre si el jugador posee el traje térmico.
+     */
     public boolean isTrajeTermico() {
         return trajeTermico;
     }
-    public void setTrajeTermico (){
+
+    /**
+     * Función que activa la bandera de progreso correspondiente al traje térmico.
+     * Desbloquea las exploraciones ilimitadas en la Nave Estrellada y otras zonas de calor extremo.
+     */
+    public void setTrajeTermico() {
         this.trajeTermico = true;
     }
+
+    /**
+     * Función que pregunta si el jugador ha obtenido los planos de reparación de la nave estrellada.
+     * @return tipo: boolean; descripción: Valor de verdad sobre si el jugador posee los planos.
+     */
     public boolean isTienePlanos() {
         return tienePlanos;
     }
-    public void setTienePlanos(){
+
+    /**
+     * Función que actualiza la bandera de progreso al adquirir los planos de reparación.
+     * Permite al jugador reparar la nave estrellada al volver a ella.
+     */
+    public void setTienePlanos() {
         this.tienePlanos = true;
     }
+
+    /**
+     * Función que retorna la lista completa de ítems en el inventario del jugador.
+     * @return tipo: List<Item>; descripción: Lista con los objetos actualmente poseídos por el jugador.
+     */
     public List<Item> getInventario() {
         return inventario;
     }
+
+    /**
+     * Función que obtiene la zona actual en la que se encuentra el jugador.
+     * @return tipo: Zona; descripción: Zona actual donde está el jugador (Arrecife, Profunda, Volcánica o Nave Estrellada).
+     */
     public Zona getZonaActual() {
         return zonaActual;
     }
+
+    /**
+     * Función que actualiza la zona actual del jugador.
+     * @param zonaActual tipo: Zona; descripción: Nueva zona asignada al jugador.
+     */
     public void setZonaActual(Zona zonaActual) {
         this.zonaActual = zonaActual;
     }
-    public void setNave(NaveExploradora nave){this.nave = nave;}
-    public NaveExploradora getNave() {return this.nave;}
+
+    /**
+     * Función que asocia una instancia de la Nave Exploradora al jugador.
+     * @param nave tipo: NaveExploradora; descripción: Referencia a la nave actualmente controlada por el jugador.
+     */
+    public void setNave(NaveExploradora nave) {
+        this.nave = nave;
+    }
+
+    /**
+     * Función que obtiene la nave asociada al jugador.
+     * @return tipo: NaveExploradora; descripción: Referencia de la nave exploradora controlada por el jugador.
+     */
+    public NaveExploradora getNave() {
+        return this.nave;
+    }
+
+    /**
+     * Función que obtiene el robot excavador asociado al jugador.
+     * @return tipo: RobotExcavador; descripción: Referencia al robot excavador del jugador (puede ser null si no ha sido construido).
+     */
     public RobotExcavador getRobot() {
         return this.robot;
     }
-    public void setRobot(RobotExcavador robot) {this.robot = robot;}
 
+    /**
+     * Función que asigna el robot excavador al jugador.
+     * @param robot tipo: RobotExcavador; descripción: Objeto que representa el robot excavador controlado por el jugador.
+     */
+    public void setRobot(RobotExcavador robot) {
+        this.robot = robot;
+    }
 
+    /**
+     * Función que pregunta si el jugador ha completado el juego (reparación de la nave estrellada).
+     * @return tipo: boolean; descripción: Valor de verdad sobre sí se ha completado la misión principal del juego.
+     */
     public boolean isJuegoCompletado() {
         return juegoCompletado;
     }
+
+    /**
+     * Función que actualiza el estado de finalización del juego.
+     * @param juegoCompletado tipo: boolean; descripción: Valor que indica si el jugador ha completado el objetivo final.
+     */
     public void setJuegoCompletado(boolean juegoCompletado) {
         this.juegoCompletado = juegoCompletado;
     }
-     // ********************
+
+    // ********************
      // * Otros métodos    *
      // ********************
 
@@ -285,6 +397,12 @@ public class Jugador implements AccesoProfundidad {
          }
      }
 
+    /**
+     * Función para detectar la zona en la que se encuentra en profundidad para poder ser actualizada en caso de cambio.
+     * @param profundidad_nueva tipo: int; descripción: profundidad en la que se encuentra el personaje
+     * @return tipo: Zona; descripción: Zona en la que se encuentra el personaje según la profundidad.
+     * (Se considera Arrecife entre [1,199]) para evitar conflicto.
+     */
      public Zona determinarZonaPorProfundidad(int profundidad_nueva){
          if (profundidad_nueva == 0) return Zonas.naveEstrellada;
          if (profundidad_nueva > 0 && profundidad_nueva <= 199) return entorno.Zonas.arrecife;

@@ -106,6 +106,14 @@ public class ZonaProfunda extends Zona {
         return profundidadMin;
     }
 
+    /**
+     * Getter del parámetro presion de la zona.
+     * @return tipo: double; descripción: Retorna la presión de la zona para el cálculo de las acciones.
+     */
+    public double getPresion() {
+        return presion;
+    }
+
     // ******************************
     // *    Métodos de la Clase     *
     // ******************************
@@ -129,9 +137,5 @@ public class ZonaProfunda extends Zona {
      */
     private int cantidadLootExploracion(double d) {
         return Math.max(1,(int)Math.floor(2*d));
-    }
-
-    public double getPresion() {
-        return presion;
     }
 }

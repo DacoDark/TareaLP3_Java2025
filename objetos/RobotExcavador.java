@@ -2,7 +2,6 @@ package objetos;
 
 import player.Jugador;
 import entorno.Zona;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +31,7 @@ public class RobotExcavador extends Vehiculo{
         this.energia = energiaMax;
         this.durabilidadMax = 100;
         this.durabilidad = durabilidadMax;
-        this.capacidad_carga = 1000; //¿Estará bien el número?
+        this.capacidad_carga = 1000; //¿Estará bien el número encuentro que es mucho?
         this.cargaActual = 0;
         this.nivel = 1;
         this.activo = false;
@@ -45,6 +44,10 @@ public class RobotExcavador extends Vehiculo{
     //*     Acciones    *
     //*******************
 
+    /**
+     * Función para sacar recursos automáticamente, siempre que no esté averiado o tenga energía.
+     * @param jugador tipo: Jugador; descripción: Personaje que juega el juego.
+     */
     public void excavarRecursos(Jugador jugador){
         if (averiado ){
             System.out.println("El robot está averiado. Requiere reparación");
@@ -101,6 +104,10 @@ public class RobotExcavador extends Vehiculo{
         }
     }
 
+    /**
+     * Función para dejar todos los items que tiene el robot en la bodega de la nave.
+     * @param nave tipo: NaveExploradora; descripción: Dirección de la nave en la cual se dejara el inventario.
+     */
     public void descargarEnNave(NaveExploradora nave){
         if (bodega.isEmpty()){
             System.out.println("El robot no tiene recursos para descargar.");
@@ -114,6 +121,9 @@ public class RobotExcavador extends Vehiculo{
         System.out.println("Descarga completa de recursos. La bodega del robot quedo vacía");
     }
 
+    /**
+     * Función que repara el Robot Excavador, una vez que está averiado. (Se puede averiar por superar la carga o durabilidad en 0)
+     */
     public void reparar(){
         if (!averiado){
             System.out.println("El robot no necesita reparación.");
@@ -124,12 +134,23 @@ public class RobotExcavador extends Vehiculo{
         System.out.println("El robot a sido reparado");
     }
 
+    /**
+     * Función que verifica si puede acceder a alguna zona. Como sigue al jugador la implementación de esta función no es necesaria.
+     * @param profundidad_minima tipo: int; descripción: Profundidad a la que se está ingresando(no tiene implementación).
+     * @return tipo: boolean; descripción: No tiene implementación
+     */
     @Override
     public boolean puedeAcceder(int profundidad_minima){
         //Depende de la nave/jugador
         return false;
     }
 
+    /**
+     * Función que transfiere items al inventario del jugador.
+     * @param jugador tipo: Jugador; descripción: Personaje que juega el juego
+     * @param tipo tipo: ItemTipo; descripción: Tipo del item que se va a transferir
+     * @param cantidad tipo: int; descripción: Cantidad del item que se va a transferir
+     */
     @Override
     public void transferirObjetos(Jugador jugador, ItemTipo tipo, int cantidad) {
         if (contarEnBodega(tipo) < cantidad){
@@ -140,6 +161,11 @@ public class RobotExcavador extends Vehiculo{
         System.out.println("Transferidos "+cantidad+" de "+tipo + " al jugador");
     }
 
+    /**
+     * Función que agrega items a bodega dado un tipo y una cantidad específica. (Esta función es llamado por DescargarEnNave())
+     * @param tipo tipo: ItemTipo; descripción: Tipo del item que se agrega a la bodega del Robot
+     * @param cantidad tipo: int; descripción: Cantidad del item que se agrega a la bodega del Robot
+     */
     @Override
     public void agregarABodega(ItemTipo tipo, int cantidad) {
         for (Item i : bodega){
@@ -150,6 +176,9 @@ public class RobotExcavador extends Vehiculo{
         bodega.add(new Item(tipo, cantidad));
     }
 
+    /**
+     * Función que lista los items que tiene actualmente el Robot en su bodega, además de información como la carga total.
+     */
     @Override
     public void verBodega() {
         System.out.println("\n=== Bodega del Robot Excavador ===");
@@ -162,6 +191,12 @@ public class RobotExcavador extends Vehiculo{
         System.out.println("Carga total: " + cargaActual + "/" + capacidad_carga);
     }
 
+    /**
+     * Función que quita un Item de la bodega reduciendo inventario, y si se saca completo lo elimina.
+     * @param jugador tipo: Jugador; descripción: Personaje que juega el juego.
+     * @param tipo tipo: ItemTipo; descripción: Tipo del item que se va a extraer
+     * @param cantidad tipo: int; descripción: Cantidad del item que se va a extraer
+     */
     @Override
     public void retirarDeBodega(Jugador jugador, ItemTipo tipo, int cantidad) {
         Iterator<Item> it = bodega.iterator();
@@ -184,6 +219,11 @@ public class RobotExcavador extends Vehiculo{
     //*     Auxiliares      *
     //***********************
 
+    /**
+     * Función para contar y poder listar de manera correcta los Items
+     * @param tipo tipo: ItemTipo; descripción: Tipo del Item que se quiere contar.
+     * @return tipo: int; descripción: Número de veces que se repite el item en el inventario.
+     */
     private int contarEnBodega(ItemTipo tipo){
         for (Item i : bodega){
             if (i.getTipo() == tipo) return i.getCantidad();
@@ -195,6 +235,9 @@ public class RobotExcavador extends Vehiculo{
     //*     Mejoras     *
     //*******************
 
+    /**
+     * Función que mejora las características del Robot, Nivel+1, Energía +25%, CapacidadMáx +25%, Durabilidad +25%
+     */
     public void mejorar(){
         if (nivel >= 3){
             System.out.println("El robot ya está en su nivel máximo");
@@ -203,7 +246,7 @@ public class RobotExcavador extends Vehiculo{
         energiaMax += 25;
         durabilidadMax += 25;
         durabilidad = durabilidadMax;
-        capacidad_carga += 25;
+        capacidad_carga += 250;
         System.out.println("Robot mejorado a nivel " + nivel + ". Capacidad de carga mejorada un 25%: " + capacidad_carga + "Energía mejorada un 25%:" + energiaMax + "durabilidad mejorada un 25%:" + durabilidad);
     }
 
@@ -211,12 +254,51 @@ public class RobotExcavador extends Vehiculo{
     //*   Getters       *
     //*******************
 
+    /**
+     * Getters de la energía
+     * @return tipo: int; descripción: Cantidad actual de la energía del robot
+     */
     public int getEnergia() { return energia; }
+
+    /**
+     * Getter de la energía máxima
+     * @return tipo: int; descripción: Cantidad máxima de la energía del robot.
+     */
     public int getEnergiaMax() { return energiaMax; }
+
+    /**
+     * Getter de la durabilidad
+     * @return tipo: int; descripción: Cantidad de durabilidad del robot.
+     */
     public int getDurabilidad() { return durabilidad; }
+
+    /**
+     * Getter de la durabilidad máxima
+     * @return tipo: int; descripción: Cantidad de la durabilidad máxima del robot.
+     */
     public int getDurabilidadMax() { return durabilidadMax; }
+
+    /**
+     * Getter de la capacidad de carga
+     * @return tipo: int; descripción: Cantidad de la capacidad de carga del robot.
+     */
     public int getCapacidad_carga() { return capacidad_carga; }
+
+    /**
+     * Getter de la carga actual
+     * @return tipo: int; descripción: Cantidad de la carga actual del robot.
+     */
     public int getCargaActual() { return cargaActual; }
+
+    /**
+     * Getter de la condición de averiado
+     * @return tipo: boolean; descripción: Valor de verdad del estado del robot.
+     */
     public boolean isAveriado() { return averiado; }
+
+    /**
+     * Getter del nivel
+     * @return tipo: int; descripción: Cantidad del nivel actual del robot.
+     */
     public int getNivel() { return nivel; }
 }

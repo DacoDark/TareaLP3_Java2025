@@ -9,6 +9,10 @@ import java.util.List;
 public abstract class Vehiculo implements AccesoProfundidad {
     protected List<Item> bodega;
 
+    //***************************************************
+    //*     Funciones que implementan los vehículos     *
+    //***************************************************
+
     public abstract void transferirObjetos(Jugador jugador, ItemTipo tipo, int cantidad);
     public abstract void agregarABodega(ItemTipo tipo,int cantidad);
     public abstract void retirarDeBodega(Jugador jugador, ItemTipo tipo, int cantidad);

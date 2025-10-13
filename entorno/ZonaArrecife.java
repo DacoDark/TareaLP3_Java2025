@@ -3,14 +3,14 @@ package entorno;
 import player.Jugador;
 import player.FormulaO2;
 import objetos.ItemTipo;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Random;
 
 /**
  * Zona del Arrecife (0-199 m)
- * Recursos: Cuarzo, Silicio, Cobre
+ * Recursos: Cuarzo, Silicio, Cobre.
+ * Aquí se pueden encontrar las piezas_tanque para mejorar el Tanque de oxígeno
  */
 public class ZonaArrecife extends Zona {
     private int piezasTanque = 3;

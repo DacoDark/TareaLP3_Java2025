@@ -18,6 +18,7 @@ public enum ItemTipo {
     CABLES,
     PIEZAS_METAL,
 
+    //Items únicos
     PIEZA_TANQUE,
     PLANO_NAVE,
     MODULO_PROFUNDIDAD
