@@ -79,9 +79,9 @@ public class RobotExcavador extends Vehiculo{
         while (energia > 10 || !averiado || cargaActual < capacidad_carga) {
 
             ItemTipo recursoEncontrado = lista.get(rand.nextInt(lista.size()));
-            int cantidad = rand.nextInt(3) + 1; // entre 1 y 3 unidades
+            int cantidad = rand.nextInt(5) + 1; // entre 1 y 5 unidades
             try {
-                Thread.sleep(400);
+                Thread.sleep(400); // Se decide esto a propósito para que sea más amigable a la vista la recolección de materiales
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
