@@ -2,10 +2,8 @@ package objetos;
 
 import player.Jugador;
 import entorno.Zona;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+
+import java.util.*;
 
 /**
  * Representa al robot excavador que controla el jugador.
@@ -34,7 +32,7 @@ public class RobotExcavador extends Vehiculo{
         this.capacidad_carga = 1000; //¿Estará bien el número encuentro que es mucho?
         this.cargaActual = 0;
         this.nivel = 1;
-        this.activo = false;
+        this.activo = true;
         this.averiado = false;
         this.rand = new Random();
         this.bodega = new ArrayList<>();
@@ -49,65 +47,75 @@ public class RobotExcavador extends Vehiculo{
      * @param jugador tipo: Jugador; descripción: Personaje que juega el juego.
      */
     public void excavarRecursos(Jugador jugador){
-        if (averiado ){
-            System.out.println("El robot está averiado. Requiere reparación");
-        }
-        if (energia < 10){
-            System.out.println("Energía insuficiente. Recarga el robot en la nave");
-        }
-        if (cargaActual >= capacidad_carga){
-            System.out.println("Capacidad de carga completa. Descarga el robot en la nave");
+        if (averiado) {
+            System.out.println("El robot está averiado y no puede excavar. Debes repararlo primero.");
+            return;
         }
 
-        activo = true;
-        Zona zona = jugador.getZonaActual();
-        System.out.println("🤖 El robot comienza a excavar en " + zona.getNombre() + "...");
+        if (!activo) {
+            System.out.println("El robot está desactivado. Actívalo antes de usarlo.");
+            return;
+        }
 
-        // Convertir el EnumSet en una lista para selección aleatoria
-        List<ItemTipo> listaRecursos = new ArrayList<>(zona.getRecursos());
-        if (listaRecursos.isEmpty()) {
-            System.out.println("No hay recursos disponibles en esta zona.");
+        if (energia <= 0) {
+            System.out.println("El robot no tiene energía suficiente para excavar.");
             activo = false;
             return;
         }
 
-        while (activo){
-            if (energia < 10 || cargaActual >= capacidad_carga) break;
+        Zona zonaActual = jugador.getZonaActual();
+        System.out.println("El robot comienza a excavar en " + zonaActual.getNombre() + "...");
 
-            energia -= 10;
-            durabilidad -= rand.nextInt(5)+2;
+        // Determinar recursos disponibles según la zona
+        EnumSet<ItemTipo> recursosZona = zonaActual.getRecursos();
 
-            if (durabilidad <= 0){
+        if (recursosZona == null || recursosZona.isEmpty()) {
+            System.out.println("No hay recursos excavables en esta zona.");
+            return;
+        }
+
+        // Elegir aleatoriamente un recurso y cantidad
+        ArrayList<ItemTipo> lista = new ArrayList<>(recursosZona);
+        while (energia > 10 || !averiado || cargaActual < capacidad_carga) {
+
+            ItemTipo recursoEncontrado = lista.get(rand.nextInt(lista.size()));
+            int cantidad = rand.nextInt(3) + 1; // entre 1 y 3 unidades
+            try {
+                Thread.sleep(400);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            // Verificar capacidad disponible
+            if (cargaActual + cantidad > capacidad_carga) {
+                System.out.println("Capacidad máxima alcanzada. Descarga el robot antes de seguir excavando.");
                 averiado = true;
-                activo = false;
-                System.out.println("El robot se ha dañado durante la excavación");
+                return;
+            }
+
+            // Agregar recurso a la bodega del robot
+            agregarABodega(recursoEncontrado, cantidad);
+            cargaActual += cantidad;
+            System.out.println("El robot encontró: "+cantidad+ " de " + recursoEncontrado);
+
+            // Gastar energía
+            energia -= 5;
+            if (energia < 0) energia = 0;
+
+            // Pequeña probabilidad de avería
+            if (rand.nextDouble() < 0.05) {
+                averiado = true;
+                System.out.println("El robot sufrió daños durante la excavación. Debe ser reparado.");
                 break;
             }
-
-            //Recursos aleatorios de la zona actual
-            ItemTipo tipo = listaRecursos.get(rand.nextInt(listaRecursos.size()));
-            int cantidad = rand.nextInt(2)+1;
-
-            if (cargaActual + cantidad > capacidad_carga){
-                cantidad = capacidad_carga - cargaActual;
-
-                agregarABodega(tipo, cantidad);
-                cargaActual = cantidad;
-
-                System.out.println("Recolectó " + cantidad + " de " + tipo + " (Energía restante: " + energia + ")");
-            }
-
-            activo = false;
-            if (!averiado){
-                System.out.println("Excavación completa. Carga actual: " + cargaActual + "/" + capacidad_carga);
-            }
         }
+        System.out.println("Excavación completa. Carga actual: " + cargaActual + "/" + capacidad_carga);
     }
 
-    /**
-     * Función para dejar todos los items que tiene el robot en la bodega de la nave.
-     * @param nave tipo: NaveExploradora; descripción: Dirección de la nave en la cual se dejara el inventario.
-     */
+
+        /**
+         * Función para dejar todos los items que tiene el robot en la bodega de la nave.
+         * @param nave tipo: NaveExploradora; descripción: Dirección de la nave en la cual se dejara el inventario.
+         */
     public void descargarEnNave(NaveExploradora nave){
         if (bodega.isEmpty()){
             System.out.println("El robot no tiene recursos para descargar.");
@@ -127,10 +135,12 @@ public class RobotExcavador extends Vehiculo{
     public void reparar(){
         if (!averiado){
             System.out.println("El robot no necesita reparación.");
+            return;
         }
 
         durabilidad = durabilidadMax;
         averiado = false;
+        activo = true;
         System.out.println("El robot a sido reparado");
     }
 
@@ -171,6 +181,7 @@ public class RobotExcavador extends Vehiculo{
         for (Item i : bodega){
             if (i.getTipo() == tipo){
                 i.setCantidad(i.getCantidad() + cantidad);
+                return;
             }
         }
         bodega.add(new Item(tipo, cantidad));
@@ -248,6 +259,12 @@ public class RobotExcavador extends Vehiculo{
         durabilidad = durabilidadMax;
         capacidad_carga += 250;
         System.out.println("Robot mejorado a nivel " + nivel + ". Capacidad de carga mejorada un 25%: " + capacidad_carga + "Energía mejorada un 25%:" + energiaMax + "durabilidad mejorada un 25%:" + durabilidad);
+    }
+
+    public void recargar(){
+        energia = energiaMax;
+        activo = true;
+        System.out.println("Recargaste a tu robot, puede volver a salir a excavar.");
     }
 
     //*******************

@@ -64,7 +64,7 @@ public class FormulaO2 {
         d = Math.min(Math.max(d, 0), 1); // asegurar rango [0,1]
 
         double costo = 3 + 3 * d * (Math.abs(deltaZ) / 50.0);
-        //System.out.printf("[DEBUG] z=%.1f, Δz=%d, d=%.3f, costo=%.3f%n", z, deltaZ, d, costo);
+        System.out.printf("[DEBUG] z=%.1f, Δz=%d, d=%.3f, costo=%.3f%n", z, deltaZ, d, costo);
 
         return (int) Math.ceil(costo);
     }

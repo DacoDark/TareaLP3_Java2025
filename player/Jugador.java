@@ -32,7 +32,7 @@ public class Jugador implements AccesoProfundidad {
         this.tienePlanos = false;
         this.mejoraTanque = false;
         this.trajeTermico = false;
-        this.moduloInstalado = false;
+        this.moduloInstalado = true;
         this.inventario = new ArrayList<>();
         this.zonaActual = Zonas.naveEstrellada;
     }
@@ -105,7 +105,7 @@ public class Jugador implements AccesoProfundidad {
         for (Item i : inventario) {
             if (i.getTipo() == tipo) {
                 i.setCantidad(i.getCantidad() + cantidad);
-                System.out.println("[DEBUG] agregado " + tipo + " (ya existía) -> total: " + i.getCantidad());
+                //System.out.println("[DEBUG] agregado" + tipo + "(ya existía) -> total: " + i.getCantidad());
                 return;
             }
         }
@@ -113,7 +113,7 @@ public class Jugador implements AccesoProfundidad {
         // si no existe, crear uno nuevo
         Item nuevo = new Item(tipo, cantidad);
         inventario.add(nuevo);
-        System.out.println("[DEBUG] agregado nuevo " + tipo + " x" + cantidad);
+        //System.out.println("[DEBUG] agregado nuevo " + tipo + " x" + cantidad);
     }
 
     /**
@@ -355,18 +355,30 @@ public class Jugador implements AccesoProfundidad {
                  nuevaZona.entrar(this);
              } else {
                  System.out.println("No existe ninguna zona en esa profundidad");
+                 return;
              }
          }
 
          if (profundidad_nueva < 0){
             System.out.println("No puedes subir más, ya estás en la superficie");
+            return;
          }
+
+         //Validar si el jugador o la nave soportan esa profundidad
+         if((this.puedeAcceder(profundidad_nueva)) || nave.puedeAcceder(profundidad_nueva)){
+             System.out.println("No puedes descender a " + profundidad_nueva + " m. La presión es demasiado alta");
+             System.out.println("tu traje no soportan esa presión, mejora el tanque en la nave para poder explorar más profundo.");
+
+             return;
+         }
+
          int delta_profundidad = profundidad_nueva - profundidadActual;
          int costo = FormulaO2.cMover(this, zona,delta_profundidad);
 
          //Si la presión es infinita, no puede moverse
          if (costo == Integer.MAX_VALUE){
              System.out.println("La presión es demasiado alta, para descender sin mejorar el tanque");
+             return;
          }
 
          //Actualizar profundidad y aplicar costo

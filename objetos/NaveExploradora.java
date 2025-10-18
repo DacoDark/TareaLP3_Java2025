@@ -152,14 +152,15 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
                 System.out.println("3. Descargar recursos en nave");
                 System.out.println("4. Reparar robot");
                 System.out.println("5. Mejorar robot");
-                System.out.println("6. Salir ");
+                System.out.println("6. Recargar robot");
+                System.out.println("7. Salir ");
                 System.out.println("\nElegir una opción: ");
                 int opRobot = sc.nextInt();
 
                 switch (opRobot) {
                     case 1  -> ensamblarRobotExcavador(jugador);
                     case 2 -> {
-                        if (jugador.getNave() == null){
+                        if (jugador.getRobot() != null){
                             jugador.getRobot().excavarRecursos(jugador);
                         } else {
                             System.out.println("Aún no tienes un robot excavador.");
@@ -167,7 +168,7 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
 
                     }
                     case 3 -> {
-                        if (jugador.getNave() == null){
+                        if (jugador.getRobot() != null){
                             jugador.getRobot().descargarEnNave(jugador.getNave());
                         } else {
                             System.out.println("Aún no tienes un robot excavador.");
@@ -191,8 +192,18 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
                         } else {
                             System.out.println("No tienes los materiales necesarios (10 Titanio, 20 cuarzo)");
                         }
-
                     }
+                    case 6 -> {
+                        if (tieneMateriales(ItemTipo.CABLES,3,ItemTipo.MAGNETITA,2)){
+
+                            jugador.consumirItem(ItemTipo.CABLES,3);
+                            jugador.consumirItem(ItemTipo.MAGNETITA,2);
+                            jugador.getRobot().recargar();
+                        } else {
+                            System.out.println("No tienes los materiales necesarios para recargar (3 Cables, 2 Magnetita)");
+                        }
+                    }
+                    case 7 -> System.out.println("Saliste del menú del robot ");
                 }
             }
             default -> System.out.println("Opción no válida");
@@ -274,7 +285,7 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
      * Función que permite fabricar al robot excavador y se le asigna al personaje.
      * @param jugador tipo: Jugador; descripción: personaje que juega el juego.
      */
-    private void ensamblarRobotExcavador(Jugador jugador){
+    public void ensamblarRobotExcavador(Jugador jugador){
         if (tieneMateriales(ItemTipo.COBRE,15,ItemTipo.MAGNETITA,10,ItemTipo.DIAMANTE,5,ItemTipo.ACERO,20)){
             consumirDeBodega(ItemTipo.COBRE,15);
             consumirDeBodega(ItemTipo.MAGNETITA,10);
@@ -282,6 +293,7 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
             consumirDeBodega(ItemTipo.ACERO,20);
             RobotExcavador robotExcavador = new RobotExcavador();
             jugador.setRobot(robotExcavador);
+            System.out.println("Has ensamblado el robot con éxito");
         } else {
             System.out.println("Materiales insuficientes para fabricar el robot excavador necesitas: \n(15 Cobre, 10 Magnetita, 5 Diamante, 20 Acero)");
         }
@@ -355,8 +367,8 @@ public class NaveExploradora extends Vehiculo implements AccesoProfundidad {
         //*     Método Constructor de la clase anidada      *
         //***************************************************
         public ModuloProfundidad(){
-            this.activo = false;
-            this.profundidad_extra = 0;
+            this.activo = false;             //Volver true para testear sin jugar modo god
+            this.profundidad_extra = 0;     //Colocar 1000 de manera manual para testear sin jugar modo god
         }
 
         /**

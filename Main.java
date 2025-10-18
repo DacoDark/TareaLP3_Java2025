@@ -29,7 +29,33 @@ public class Main {
         boolean enNave = true;      //Jugador inicia dentro de la nave exploradora
         boolean jugando = true;
 
+        /*
+        //Borrar estos comentarios para Testear Sin jugar - Modo Good
+        //El módulo de profundidad se setea dentro de la clase anidada junto con la profundidad extra que agrega.
 
+        jugador.setMejoraTanque(true);
+        jugador.getTanqueOxigeno().aumentarOxigeno(1000); //Primera mejora y oxígeno infinito (solo es mucho no puede ser infinito)
+        jugador.setTrajeTermico();
+        */
+
+
+        //Testeo Robot
+        jugador.agregarItem(ItemTipo.COBRE,15);
+        jugador.agregarItem(ItemTipo.MAGNETITA,10);
+        jugador.agregarItem(ItemTipo.DIAMANTE,5);
+        jugador.agregarItem(ItemTipo.ACERO,20);
+        //Los materiales tienen que estar guardados en la bodega de la nave para crear el robot. (Intenta hacerlo manualmente ;))
+
+        /*
+        //Flag final del juego
+        jugador.setTienePlanos();
+
+        //Agregamos items para ganar
+        jugador.agregarItem(ItemTipo.TITANIO,50);
+        jugador.agregarItem(ItemTipo.ACERO,30);
+        jugador.agregarItem(ItemTipo.URANIO,15);
+        jugador.agregarItem(ItemTipo.SULFURO,20);
+        */
 
         System.out.println("=== Exploración Subacuática - Inicio ===");
         System.out.println("Comienzas en la Nave Estrellada (0 m)");
@@ -46,6 +72,11 @@ public class Main {
                 System.out.println("---------------------------------------");
 
                 if (enNave) {
+                    //Condición Victoria
+                    if (jugador.isJuegoCompletado()) {
+                        System.out.println("🚀 ¡Has completado la misión!");
+                        jugando = false;
+                    }
                     jugador.getTanqueOxigeno().recargarCompleto(); //Recarga 02 en la nave
                     // -Menú dentro de la nave-
                     System.out.println("\n--- Menú: Dentro de la Nave ---");
@@ -67,7 +98,12 @@ public class Main {
                             System.out.print("Nueva profundidad de anclaje: ");
                             int profundidad = sc.nextInt();
                             nave.anclarNaveExploradora(profundidad);
-                            jugador.setProfundidadActual(profundidad);
+                            //Se agrega condición para verificar que el jugador no pueda acceder a más de 500 m sin el módulo
+                            if (profundidad > 500 && !jugador.tieneModuloProfundidad()){
+                                continue;
+                            } else {
+                                jugador.setProfundidadActual(profundidad);
+                            }
                         }
                         case 3 -> jugador.verInventario();
                         case 4 -> nave.verBodega();
@@ -101,6 +137,7 @@ public class Main {
                             jugando = false;
                             System.out.println("Saliendo del juego...");
                         }
+                    default -> System.out.println("Opción inválida.");
                     }
                     //Recarga automática al estar en la nave
                     jugador.getTanqueOxigeno().recargarCompleto();
@@ -139,47 +176,42 @@ public class Main {
                             break;
 
                         case 5:
-                            //Jugador decide volver a la nave
-                            enNave = true;
-                            //Recarga su oxígeno
-                            jugador.getTanqueOxigeno().recargarCompleto();
-                            //Su nueva zona es la zona donde está anclada la nave.
                             //Obtenemos la profundidad de la nave
                             int nueva_profundidad = jugador.getNave().getProfundidadAnclaje();
                             //Actualizamos la profundidad del jugador con la profundidad de la nave
                             jugador.profundidadActualizar(nueva_profundidad, jugador.getZonaActual());
+
+                            //Se verifica la condición de muerte antes de recargar el oxígeno.
+                            // Condición de derrota: O2 = 0
+                            if (jugador.getTanqueOxigeno().getOxigenoRestante() <= 0){
+                                System.out.println("Te has quedado sin oxígeno durante la inmersión...");
+                                System.out.println("Pierdes todo tu inventario y reapareces en la nave.");
+                                enNave = true;
+                                //Vaciar inventario
+                                jugador.vaciarInventario();
+
+                                //Reaparecer en nave anclada
+                                jugador.setProfundidadActual(nave.getProfundidadAnclaje());
+
+                                //Determinar zona según profundidad del anclaje
+                                Zona nuevaZona = jugador.getNave().getZonaAnclajeActual();
+                                jugador.setZonaActual(nuevaZona);
+
+                                //Recargar Oxígeno
+                                jugador.getTanqueOxigeno().recargarCompleto();
+                                System.out.println("Has reaparecido en la nave anclada a " + jugador.getNave().getProfundidadAnclaje() + " m. Oxígeno recargado.");
+                            }
+                            //Recarga su oxígeno
+                            jugador.getTanqueOxigeno().recargarCompleto();
+                            //Jugador decide volver a la nave
+                            enNave = true;
+                            //Su nueva zona es la zona donde está anclada la nave.
                             // System.out.print("[DEBUG] La profundidad del jugador es: "+ jugador.getProfundidadActual() + " y al volver debería ser: " + jugador.getNave().getProfundidadAnclaje());
                             System.out.println("Regresaste a la nave.");
                             break;
 
                         default:
                             System.out.println("Opción inválida.");
-                    }
-
-                    // Condición de derrota: O2 = 0
-                    if (jugador.getTanqueOxigeno().getOxigenoRestante() <= 0){
-                        System.out.println("Te has quedado sin oxígeno durante la inmersión...");
-                        System.out.println("Pierdes todo tu inventario y reapareces en la nave.");
-                        enNave = true;
-                        //Vaciar inventario
-                        jugador.vaciarInventario();
-
-                        //Reaparecer en nave anclada
-                        jugador.setProfundidadActual(nave.getProfundidadAnclaje());
-
-                        //Determinar zona según profundidad del anclaje
-                        Zona nuevaZona = jugador.getNave().getZonaAnclajeActual();
-                        jugador.setZonaActual(nuevaZona);
-
-                        //Recargar Oxígeno
-                        jugador.getTanqueOxigeno().recargarCompleto();
-                        System.out.println("Has reaparecido en la nave anclada a " + jugador.getNave().getProfundidadAnclaje() + " m. Oxígeno recargado.");
-                    }
-
-                    //Condición Victoria
-                    if (jugador.isJuegoCompletado()) {
-                        System.out.println("🚀 ¡Has completado la misión!");
-                        jugando = false;
                     }
                 }
             } catch (InputMismatchException e) {

@@ -51,8 +51,9 @@ public class ZonaProfunda extends Zona {
      */
     @Override
     public void recolectarTipoRecurso(Jugador jugador, ItemTipo tipo) {
-        if (jugador.getProfundidadActual() > 500 && jugador.tieneModuloProfundidad()){
+        if (jugador.getProfundidadActual() > 500 && !jugador.tieneModuloProfundidad()){
             System.out.println("No puedes recolectar más allá de 500 sin el modulo de profundidad.");
+            return;
         }
         if (!recursos.contains(tipo)) {
             System.out.println("Ese tipo recurso no se encuentra en esta zona.");
@@ -73,8 +74,9 @@ public class ZonaProfunda extends Zona {
      */
     @Override
     public void explorarZona(Jugador jugador) {
-        if (jugador.getProfundidadActual() > 500 && jugador.tieneModuloProfundidad()){
+        if (jugador.getProfundidadActual() > 500 && !jugador.tieneModuloProfundidad()){
             System.out.println("No puedes explorar bajo 500 m si el modulo de profundidad.");
+            return;
         }
 
         double d = normalizarProfundidad(jugador.getProfundidadActual());

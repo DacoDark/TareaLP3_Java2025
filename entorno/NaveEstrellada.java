@@ -37,9 +37,9 @@ public class NaveEstrellada extends Zona {
      */
     @Override
     public void entrar(Jugador jugador) {
-        System.out.println("Te encuentras en la Nave Estrellada, está en llamas 🔥🔥🔥 y en cualquier momento puede explotar!.");
+        System.out.println("Te encuentras en la Nave Estrellada, está en llamas y en cualquier momento puede explotar!.");
         if (jugador.isTienePlanos()) {
-            System.out.println("🔥 El incendio de la nave puede ser apagado con los recursos adecuados...");
+            System.out.println("El incendio de la nave puede ser apagado con los recursos adecuados...");
             System.out.println("Usas los planos y comienzas las reparaciones...");
             repararNave(jugador);
         } else {
@@ -142,7 +142,7 @@ public class NaveEstrellada extends Zona {
             System.out.println("Necesito los planos de esta maquina para comenzar a reparar, mejor me pongo en marcha, no hay tiempo que perder.");
         }
 
-        System.out.println("Reparando el interior de la nave estrellada...");
+        System.out.println("Intentando reparar el interior de la nave estrellada...");
 
         int reqTitanio = 50;
         int reqAcero = 30;
@@ -156,8 +156,8 @@ public class NaveEstrellada extends Zona {
 
         if (Titanio < reqTitanio || Acero < reqAcero || Uranio < reqUranio || Sulfuro < reqSulfuro) {
             System.out.println("No tienes suficientes materiales para reparar la nave, examinas el plano y te das cuenta que necesitas: ");
-            System.out.println("Titanio: " + reqTitanio + " Acero: " + reqAcero + "Uranio: " +reqUranio + "Sulfuro: " + reqSulfuro + "Sulfuro: " + reqSulfuro);
-            System.out.println("Tienes actualmente: " + Titanio + " de Titanio" + Acero + "de Acero" + Sulfuro + " de Sulfuro" + Uranio + "de Uranio");
+            System.out.println("Titanio: " + reqTitanio + " \nAcero: " + reqAcero + "\nUranio: " +reqUranio + "\nSulfuro: " + reqSulfuro);
+            System.out.println("Tienes actualmente: \n" + Titanio + " de Titanio\n" + Acero + " de Acero\n" + Uranio + " de Uranio\n" + Sulfuro + " de Sulfuro");
         } else {
             jugador.consumirItem(ItemTipo.TITANIO,reqTitanio);
             jugador.consumirItem(ItemTipo.ACERO,reqAcero);
